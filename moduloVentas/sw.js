@@ -3,7 +3,7 @@ self.addEventListener('install', function(event) {
     caches.open('aplicacionVentas')
       .then(function(cache) {  
         return cache.addAll([
-          'ventas.php',
+          'ventas.php?v=active',
           'no-wifi.png',
           '../mdb/css/bootstrap.min.css',    
           '../mdb/css/mdb.min.css',   

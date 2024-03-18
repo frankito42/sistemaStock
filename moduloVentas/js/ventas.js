@@ -226,8 +226,11 @@ async function guardarVenta(tipoPago) {
             venta.push(element.children[2].children[0].value.replace(/,/g, ""))
             /* venta[array()].push(element.children[2].children[0].value) */
             ventas.push(venta)
+            console.log(descontarStock(venta[0],venta[2]))
             venta=[]
         })
+
+        
         console.log(ventas)
         let userEsta=localStorage.getItem("user")
         let productosVender = new FormData();
@@ -361,18 +364,24 @@ async function listarTodosLosProductos() {
     .then(data => {
         localStorage.setItem("productosModuloVentas",JSON.stringify(data))
              /*  console.log(data)  */
-              let elementos=``
-              data.forEach(element => {
-                  elementos+=`
-                  <tr class="hoverProduct" onclick="cargarProductoTablaVenta('${(element.codBarra)?element.codBarra:'no'}',${element.articulo},'mayo')">
-                    <td>${element.nombre}</td>
-                    <td style="display:none;">$${separator(element.precioVenta)} <button class="btn btn-blue btn-sm" onclick="cargarProductoTablaVenta('${(element.codBarra)?element.codBarra:'no'}',${element.articulo})"><i class="fas fa-plus fa-1x"></i></button></td>
-                    <td>$${separator(element.mayoritario)}</td>
-                  </tr>
-                  `
-              });
-              document.getElementById("aquiMostrarTodo").innerHTML=elementos
+        dibujarTablaArticulos(data)
+             
     });
+}
+function dibujarTablaArticulos(data) {
+    let elementos=``
+    data.forEach(element => {
+        elementos+=`
+        <tr class="hoverProduct" onclick="cargarProductoTablaVenta('${(element.codBarra)?element.codBarra:'no'}',${element.articulo},'mayo')">
+          <td>${element.nombre}</td>
+          <td>${element.cantidad}</td>
+          <td>${element.costo}</td>
+          <td style="display:none;">$${separator(element.precioVenta)} <button class="btn btn-blue btn-sm" onclick="cargarProductoTablaVenta('${(element.codBarra)?element.codBarra:'no'}',${element.articulo})"><i class="fas fa-plus fa-1x"></i></button></td>
+          <td>$${separator(element.mayoritario)}</td>
+        </tr>
+        `
+    });
+    document.getElementById("aquiMostrarTodo").innerHTML=elementos
 }
 
 let integrantes
@@ -413,9 +422,9 @@ function separatorthis(numb) {
 }
 
 document.addEventListener("keyup", function(event) {
-    /*  console.log(event.key)
-     console.log(event.target.id) */
-     if (event.key === "Enter" && event.target.id!="codigoDeBarra" && event.target.id!="cobro" && event.target.id!="imprimeTicket" && event.target.id!="pregunta" && event.target.id!="libreta") {
+     console.log(event.key)
+     console.log(event.target.id)
+     if (event.key === "Enter" && event.target.id!="codigoDeBarra" && event.target.id!="cobro" && event.target.id!="imprimeTicket" && event.target.id!="pregunta" && event.target.id!="libreta" && event.target.id!="modalCreditos") {
          console.log("entro aqui")
          
          $("#mostarProductElegir").modal("hide")
@@ -502,6 +511,7 @@ async function guardarVentaEnLibreta() {
             venta.push(document.getElementById("listarIntegrantes").value)
             /* venta[array()].push(element.children[2].children[0].value) */
             ventas.push(venta)
+            console.log(descontarStock(venta[0],venta[2]))
             venta=[]
         })
        /*  console.log(ventas) */
@@ -695,6 +705,10 @@ function imprimirElemento(){
         
         await expandirDiv()
         await ponerQR()
+    }else if(a === "5"){
+        $("#metodoDePago").modal("hide")
+        $("#modalCreditos").modal("show")
+        console.log("siiiiiiuuuuu")
     }
 };
 
@@ -1074,11 +1088,56 @@ function redondearDecena(numero) {
 
 
 
+function calcularPrecioConCuotas(precio, cuotas) {
+    // Verificar que el número de cuotas esté en el rango permitido
+    if (cuotas < 2 || cuotas > 6) {
+        return "El número de cuotas debe estar entre 2 y 6.";
+    }
+    precio=parseFloat(precio)
+    // Calcular el aumento porcentual según la cantidad de cuotas
+    const aumentoPorcentual = cuotas * 10; // 10% por cada cuota
+    const precioConAumento = precio + (precio * aumentoPorcentual / 100);
+
+    // Calcular el 30% del valor total para la entrega
+    const entrega = precioConAumento * 0.30;
+
+    // Calcular el monto restante después de la entrega
+    const montoRestante = precioConAumento - entrega;
+
+    // Calcular el precio de cada cuota
+    const precioCuota = montoRestante / cuotas;
+
+    // Retornar un objeto con el precio con aumento, la entrega y el precio de cada cuota
+    return {
+        precioConAumento: precioConAumento,
+        entrega: entrega,
+        precioCuota: precioCuota,
+    };
+}
 
 
 
 
+function chequeado(cuotas) {
+    let total=document.getElementById("segundoTotal").innerHTML.replace(/,/g, "")
+    let planCuotas=calcularPrecioConCuotas(total,cuotas)
+    console.log(calcularPrecioConCuotas(total,cuotas))
+    document.getElementById("entregaCredito").value=planCuotas.entrega
+}
 
+
+function descontarStock(id,descontar) {
+    console.log(id)
+    let stock=JSON.parse(localStorage.getItem("productosModuloVentas"))
+    let producto = stock.find(obj => obj.articulo == id);
+    if (producto) {
+        producto.cantidad -= descontar;
+        localStorage.setItem("productosModuloVentas",JSON.stringify(stock))
+        dibujarTablaArticulos(stock)
+        return producto;
+    }
+    return null;
+}
 
 
 

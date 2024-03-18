@@ -4,10 +4,10 @@ $articulo = $_POST;
 
     $sqlAddNewProduct="INSERT INTO `articulos`(`nombre`, `costo`, `stockmin`,
     `descripcion`, `categoria`, `codBarra`, `precioVenta`,
-    `idEsta`, `mayoritario`) VALUES 
+    `idEsta`, `mayoritario`,keyTwoLabor) VALUES 
     (:nombre,:costo,:stockmin,
     :desc,:cat,:cod,
-    :precio,:idEsta,:mayo)";
+    :precio,:idEsta,:mayo,:labor)";
     $addNewProduct=$conn->prepare($sqlAddNewProduct);
     $addNewProduct->bindParam(":nombre",$articulo['newNombreA']);
     $caracteres = Array(".",",");
@@ -23,6 +23,7 @@ $articulo = $_POST;
     $esta=1;
     $addNewProduct->bindParam(":idEsta",$esta);
     $addNewProduct->bindParam(":mayo",$resultado3);
+    $addNewProduct->bindParam(":labor",$articulo['laboratoriosSearch']);
     if($addNewProduct->execute()){
     echo json_encode("perfecto");
 }

@@ -1,4 +1,5 @@
 let todosLosArticulosCategorias
+let allLaboratorios
 function cargando(){
         document.getElementById("articulosTabla").innerHTML="<tr><td colspan='8'><h3 class='text-center'>Cargando...</h3></td></tr>"
 }
@@ -26,10 +27,11 @@ async function listarProveedores() {
   });
     
 }
-/* async function listarLaboratorios() {
+async function listarLaboratorios() {
   await fetch('php/listarLaboratorios.php')
   .then(response => response.json())
   .then(async (data)=>{
+    allLaboratorios=data
     console.log(data)
     let option=`<option value="" selected disabled>Seleccionar Laboratorio</option>`
     data.forEach(element => {
@@ -39,7 +41,7 @@ async function listarProveedores() {
     document.getElementById("laboratoriosSearch").innerHTML=option
   });
     
-} */
+}
 async function listarCategorias() {
   await fetch('php/listarCategorias.php')
   .then(response => response.json())
@@ -361,7 +363,7 @@ $(document).ready(async function(){
     await dibujarCategorias(todosLosArticulosCategorias[0])
     await dibujarSelect(todosLosArticulosCategorias[2])
     await listarProveedores()
-    /* await listarLaboratorios() */
+    await listarLaboratorios()
     await listarCategorias()
     
     
@@ -404,6 +406,12 @@ $(document).ready(async function(){
       todosLosArticulosCategorias[3].forEach(element => {
         proveedor+=`
         <option ${(element.idProveedor==filtroArray.idProveedor)?"selected":""} value="${element.idProveedor}">${element.nombreP}</option>
+        `
+      });
+      let optionsLabor=``
+      allLaboratorios.forEach(element => {
+        optionsLabor+=`
+        <option ${(element.idLaboratorio==filtroArray.keyTwoLabor)?"selected":""} value="${element.idLaboratorio}">${element.nombreLaboratorio}</option>
         `
       });
       let modalEdit=`
@@ -498,7 +506,13 @@ $(document).ready(async function(){
                         
                         </select>
                     </div>
-                    
+                     <div class="col">
+                        <select id="selectLaborEdit${id}" required class="form-control">
+                        <option value="">Laboratorios</option>
+                        ${optionsLabor}
+                        
+                        </select>
+                    </div>
                   
                     
                     </div>
@@ -513,19 +527,7 @@ $(document).ready(async function(){
                     </div>
                 </div>
               </div>`
-        /* 
-        
-        
-        <div class="col">
-                        <select id="selectLaborEdit${id}" required class="form-control">
-                        <option value="">Laboratorios</option>
-                        ${optionsLabor}
-                        
-                        </select>
-                    </div>
-        
-        
-        */
+  
               $(modalEdit).modal("show")
     }
    
@@ -566,14 +568,15 @@ $(document).ready(async function(){
       `
     }else{ */
       tablaArticulos+=`
-      <tr>
+      <tr style="background:${(element['cantidad']<=5)?"#ffaaaa":""};">
       <td>${element['nombre']}</td>
       <td>${separator(element['costo'])}</td>
       <td>${separator(element['mayoritario'])}</td>
       <td style="display:none;">${separator(element['precioVenta'])}</td>
       <td>${element['cantidad']}</td>
-      <td>${element['nombreCategoria']}</td>
-      <td>${element['nombreP']}</td>
+      <td style="display:none;">${element['nombreCategoria']}</td>
+      <td>${(element['nombreP'])?element['nombreP']:""}</td>
+      <td>${(element['nombreLaboratorio'])?element['nombreLaboratorio']:""}</td>
       <td>${element['codBarra']}</td>
       <td style="display:none;">
   
@@ -751,7 +754,7 @@ $(document).ready(async function(){
     cantidadEdit:document.getElementById("cantidadEdit"+id).value,
     descripcionEdit:document.getElementById("descripcionEdit"+id).value,
     categoriaEdit:document.getElementById("selectCategoriaEdit"+id).value,
-    labor:0,
+    labor:document.getElementById("selectLaborEdit"+id).value,
     codBarraEdit:document.getElementById("codBarraEdit"+id).value,
     proveedor:document.getElementById("selectProve"+id).value,
     precioMayo:document.getElementById("precioMayo"+id).value.replace(/,/g, "")

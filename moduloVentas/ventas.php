@@ -128,69 +128,7 @@ require "../conn/conn.php";
     </div>
   </div>
     <section>
-        <nav class="mb-1 navbar navbar-expand-lg navbar-dark info-color">
-        <a class="navbar-brand" href="#"><?php echo $local["nombre"]?></a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent-4">
-            <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link waves-effect waves-light" href="../index.php">inicio
-                <span class="sr-only">(current)</span>
-                </a>
-            </li>
-            <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle waves-effect waves-light" id="navbarDropdownMenuLink-5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Productos
-                  </a>
-                  <div class="dropdown-menu dropdown-default" aria-labelledby="navbarDropdownMenuLink-5">
-                  <a class="dropdown-item waves-effect waves-light" href="../moduloStock/stock.php">Stock</a>
-                  <a class="dropdown-item waves-effect waves-light" href="../moduloCategorias/categorias.php">Categorias</a>
-                  <!-- <a class="dropdown-item waves-effect waves-light" href="#">Something else here</a> -->
-                  </div>
-              </li>
-            <li class="nav-item">
-                <a class="nav-link waves-effect waves-light" href="../moduloCompras/compras.php">Compras</a>
-            </li>
-            <li class="nav-item active">
-                <a class="nav-link waves-effect waves-light" href="ventas.php">Ventas</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link waves-effect waves-light" href="../moduloLibreta/libreta.php">Libreta</a>
-              </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle waves-effect waves-light" id="navbarDropdownMenuLink-3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin
-                </a>
-                <div class="dropdown-menu dropdown-default" aria-labelledby="navbarDropdownMenuLink-3">
-                  <a class="dropdown-item waves-effect waves-light" href="../moduloProvedor/provedor.php">Proveedores</a>
-                  <a class="dropdown-item waves-effect waves-light" href="../moduloClientes/clientes.php">Clientes</a>
-<!--                 <a class="dropdown-item waves-effect waves-light" href="../moduloLaboratorios/laboratorios.php">Laboratorios</a>
- -->                <a class="dropdown-item waves-effect waves-light" href="../moduloVentasDetalle/todasLasVentas.php">Caja</a>
-                </div>
-            </li>
-            </ul>
-            <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link waves-effect waves-light" href="#">
-                <i class="fas fa-envelope"></i> Contacto
-                <span class="sr-only">(current)</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link waves-effect waves-light" href="#">
-                <i class="fas fa-gear"></i> Configuraciones</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle waves-effect waves-light" id="navbarDropdownMenuLink-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-user"></i> <span id="userNameID"></span> </a>
-                <div class="dropdown-menu dropdown-menu-right dropdown-info" aria-labelledby="navbarDropdownMenuLink-4">
-                <a class="dropdown-item waves-effect waves-light" href="#">My account</a>
-                <a class="dropdown-item waves-effect waves-light" id="cerrarSession">Cerrar sesion</a>
-                </div>
-            </li>
-            </ul>
-        </div>
-        </nav>
+        <?php require "../navBar/navCarpeta.php";?>
     </section>
     <section>
         <div class="container">
@@ -327,6 +265,8 @@ require "../conn/conn.php";
                         <tr> 
                         <th style="font-weight: bold;" scope="col">Nombre</th>
 <!--                         <th scope="col">Precio en pesos</th> -->
+                        <th style="font-weight: bold;" scope="col">Cantidad</th>
+                        <th style="font-weight: bold;" scope="col">Costo</th>
                         <th style="font-weight: bold;" scope="col">Precio</th>
                         </tr>
                     </thead>
@@ -369,7 +309,7 @@ require "../conn/conn.php";
        <div class="modal-body">
         
               <div  class="row text-center">
-                <div onclick="numeroClick('1')" style="display:relative;" class="col-6">
+                <div onclick="numeroClick('1')" style="display:relative;" class="col-6 mb-4">
                   <h4 class="waves-effect waves-ligh" style="background-image: linear-gradient(to left bottom, #0ebe08, #10c110, #03ab07, #33c339, #12eb21);color: white;border-radius: 5px;padding: 10%;box-shadow: 0px 0px 20px 0px #00000078;">Efectivo</h4>
                   <div class="waves-effect waves-ligh" style="background-image: linear-gradient(to left bottom, #0ebe08, #10c110, #03ab07, #33c339, #12eb21);box-shadow: 0px 0px 3px 0px #00000078;border-radius: 5px;color: white;">Nro 1</div>
                 </div>
@@ -377,13 +317,17 @@ require "../conn/conn.php";
                   <h4 class="waves-effect waves-ligh aqua-gradient" style="color: white;border-radius: 5px;padding: 10%;box-shadow: 0px 0px 20px 0px #00000078;">Libreta</h4>
                   <div class="waves-effect waves-ligh aqua-gradient" style="box-shadow: 0px 0px 3px 0px #00000078;border-radius: 5px;color: white;">Nro 2</div>
                 </div>
-                <div onclick="numeroClick('3')" style="display:relative;" class="col-6">
+                <div onclick="numeroClick('3')" style="display:relative;" class="col-6 mb-4">
                   <h4 class="waves-effect waves-ligh blue-gradient" style="background: #33cce5;color: white;border-radius: 5px;padding: 10%;box-shadow: 0px 0px 20px 0px #00000078;">MP/Tarjeta etc.</h4>
                   <div class="waves-effect waves-ligh blue-gradient" style="background: #33cce5;box-shadow: 0px 0px 3px 0px #00000078;border-radius: 5px;color: white;">Nro 3</div>
                 </div>
-                <div onclick="numeroClick('4')" style="display:relative;" class="col-6">
+                <div onclick="numeroClick('4')" style="display:relative;" class="col-6 mb-4">
                   <h4 class="waves-effect waves-ligh blue-gradient" style="background: #33cce5;color: white;border-radius: 5px;padding: 10%;box-shadow: 0px 0px 20px 0px #00000078;"><i class="fa-solid fa-qrcode"></i></h4>
                   <div class="waves-effect waves-ligh blue-gradient" style="background: #33cce5;box-shadow: 0px 0px 3px 0px #00000078;border-radius: 5px;color: white;">Nro 4</div>
+                </div>
+                <div onclick="numeroClick('5')" style="display:relative;" class="col-6 mb-4">
+                  <h4 class="waves-effect waves-ligh purple-gradient" style="background: #33cce5;color: white;border-radius: 5px;padding: 10%;box-shadow: 0px 0px 20px 0px #00000078;"><i class="fa-solid fa-handshake"></i></h4>
+                  <div class="waves-effect waves-ligh purple-gradient" style="background: #33cce5;box-shadow: 0px 0px 3px 0px #00000078;border-radius: 5px;color: white;">Creditos Nro 5</div>
                 </div>
               </div>
         
@@ -609,7 +553,63 @@ require "../conn/conn.php";
 
 
 
+<!-- Modal -->
+<div class="modal fade" id="modalCreditos" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header purple-gradient">
+        <h5 class="modal-title" id="exampleModalLabel">Creditos-Cuotas</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12">
+            <div class="md-form form-group mt-5">
+              <input style="font-size: 200%;font-weight: bold;text-align: center;" type="number" class="form-control" id="entregaCredito" placeholder="">
+              <label for="entregaCredito">Entrega</label>
+            </div>
+          </div>
+          <div class="col-12">
+              <!-- Group of default radios - option 1 -->
+              <div class="custom-control custom-radio">
+                <input onchange="chequeado(2)" type="radio" class="custom-control-input" id="defaultGroupExample1" name="groupOfDefaultRadios">
+                <label class="custom-control-label" for="defaultGroupExample1">En 2 cuotas</label>
+              </div>
 
+              <!-- Group of default radios - option 2 -->
+              <div class="custom-control custom-radio">
+                <input onchange="chequeado(3)" type="radio" class="custom-control-input" id="defaultGroupExample2" name="groupOfDefaultRadios" checked>
+                <label class="custom-control-label" for="defaultGroupExample2">En 3 cuotas</label>
+              </div>
+
+              <!-- Group of default radios - option 3 -->
+              <div class="custom-control custom-radio">
+                <input onchange="chequeado(4)" type="radio" class="custom-control-input" id="defaultGroupExample3" name="groupOfDefaultRadios">
+                <label class="custom-control-label" for="defaultGroupExample3">En 4 cuotas</label>
+              </div>
+              <!-- Group of default radios - option 3 -->
+              <div class="custom-control custom-radio">
+                <input onchange="chequeado(5)" type="radio" class="custom-control-input" id="defaultGroupExample4" name="groupOfDefaultRadios">
+                <label class="custom-control-label" for="defaultGroupExample4">En 5 cuotas</label>
+              </div>
+              <!-- Group of default radios - option 3 -->
+              <div class="custom-control custom-radio">
+                <input onchange="chequeado(6)" type="radio" class="custom-control-input" id="defaultGroupExample5" name="groupOfDefaultRadios">
+                <label class="custom-control-label" for="defaultGroupExample5">En 6 cuotas</label>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
