@@ -578,6 +578,7 @@ $(document).ready(async function(){
       <td>${(element['nombreP'])?element['nombreP']:""}</td>
       <td>${(element['nombreLaboratorio'])?element['nombreLaboratorio']:""}</td>
       <td>${element['codBarra']}</td>
+      <td><p>${(element['fechaVence'])?element['fechaVence']:""}<p>${calcularDias(element['fechaVence'])}</td>
       <td style="display:none;">
   
   <input style="display: block;" type="number" placeholder="Cambio" onkeyup="pesosGuarani(this)">
@@ -1194,5 +1195,18 @@ function sumaLocalIniciandoEnCosto(e) {
 
 
 
+function calcularDias(f) {
+  if(f){
+    let vencimiento = new Date(f);
+    let fechaActual = new Date();
+    let milisegundosDiferencia = vencimiento - fechaActual;
+    let diasDiferencia = Math.floor(milisegundosDiferencia / (1000 * 60 * 60 * 24));
+    console.log(diasDiferencia);
+    return "Dias "+diasDiferencia
+  }else{
+    return ""
+  }
 
+  // Cambiar el estilo del campo según la cantidad de días restantes (similar al ejemplo anterior)
+}
 

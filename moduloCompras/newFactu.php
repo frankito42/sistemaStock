@@ -6,6 +6,7 @@ $menorCentaje=$_POST['meno'];
 /* $mayorCentaje=$_POST['mayo']; */
 /* $provedor=$_POST['provedor']; */
 $observacion=$_POST['observacion'];
+$vence=$_POST['vence'];
 $idArticulo=$_POST['idArticulo'];
 $cantidad=$_POST['cantidad'];
 $precioVenta=$_POST['precioventa']; 
@@ -56,11 +57,12 @@ for ($i=0; $i < count($idArticulo) ; $i++) {
  /*    $costo[$i]+=$transporte[$i]; */
     $sumaStock=$sellArticulo['cantidad']+$cantidad[$i];
 
-    $sqlUpdateStock="UPDATE `articulos` SET `costo`=:costo, `cantidad`=:cantidad, `idProveedor`=:idProveedor, mayoritario=:may, menorCentaje=:menorPorcentaje WHERE `articulo`=:id";
+    $sqlUpdateStock="UPDATE `articulos` SET `costo`=:costo, `cantidad`=:cantidad, `idProveedor`=:idProveedor, mayoritario=:may, menorCentaje=:menorPorcentaje, fechaVence=:vence WHERE `articulo`=:id";
     $upCantidad=$conn->prepare($sqlUpdateStock);
     $upCantidad->bindParam(":id",$idArticulo[$i]);
     $upCantidad->bindParam(":cantidad",$sumaStock);
     $upCantidad->bindParam(":costo",$costo[$i]);
+    $upCantidad->bindParam(":vence",$vence[$i]);
     $upCantidad->bindParam(":idProveedor",$idProve);
     $caracteres = Array(",");
     $resultado1 = str_replace($caracteres,"",$precioVenta[$i]);

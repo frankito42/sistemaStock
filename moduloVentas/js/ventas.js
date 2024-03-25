@@ -110,12 +110,19 @@ async function cargarProductoTablaVenta(codi,idPro,mayoriOminori) {
                 celda2 = document.createElement("td");
                 celda3 = document.createElement("td");
                 celda4 = document.createElement("td");
-                celda5 = document.createElement("td");
+                celda4.classList.add("subTotalTable")
+                celda5 = document.createElement("td"); 
+                celda6 = document.createElement("td"); 
+                celda5.style="text-align: center;"
                 input1 = document.createElement("input")
                 input2 = document.createElement("input")
+                input4 = document.createElement("input")
+                input1.classList.add("inputVenta")
+                input2.classList.add("inputVenta")
+                input4.classList.add("inputVenta")
                 input1.value=1
                 input1.type="number"
-                input1.style.width="71px"
+                /* input1.style.width="71px" */
                 
                 input1.addEventListener("change", async()=>{
                    await sumarTodo()
@@ -130,13 +137,16 @@ async function cargarProductoTablaVenta(codi,idPro,mayoriOminori) {
     
                 input2.value=separator(maOmi)
                 input2.type="text"
-                input2.style.width="87px"
+                /* input2.style.width="87px" */
                 input2.addEventListener("change",async ()=>{
                     this.value=separator(maOmi)
                    await sumarTodo()
                 })
                 input2.addEventListener("keyup",async ()=>{
                     this.value=separator(maOmi)
+                   await sumarTodo()
+                })
+                input4.addEventListener("keyup",async ()=>{
                    await sumarTodo()
                 })
                 input3=document.createElement("input")
@@ -151,6 +161,7 @@ async function cargarProductoTablaVenta(codi,idPro,mayoriOminori) {
                 celda1.appendChild(textoCelda1);
                 celda2.appendChild(input1);
                 celda2.appendChild(input3); 
+                celda6.appendChild(input4);
                 celda3.appendChild(input2);
                 
                 celda5.innerHTML=`<button onclick="deleteTdTable(this)" class="btn btn-danger btn-sm">x</button><input style="display:none;" type="text" />`
@@ -158,6 +169,7 @@ async function cargarProductoTablaVenta(codi,idPro,mayoriOminori) {
                 fila.appendChild(celda1);
                 fila.appendChild(celda2);
                 fila.appendChild(celda3);
+                fila.appendChild(celda6);
                 fila.appendChild(celda4);
                 fila.appendChild(celda5);
                /*  let tr=`
@@ -193,14 +205,17 @@ async function deleteTdTable(e) {
 async function sumarTodo() {
     let acumulador=0
     let no=true
+    let precio=0
     document.getElementById("ProductosVender").children.forEach(element => {
         /* console.log(parseFloat(element.children[1].children[0].value.replace(/,/g, "")))
         console.log(parseFloat((element.children[2].children[0].value.replace(/,/g, "")))) */
-        let suma=parseFloat(element.children[1].children[0].value.replace(/,/g, ""))*parseFloat((element.children[2].children[0].value.replace(/,/g, "")))
-
-        acumulador=acumulador+parseFloat(suma.toFixed(2))
+        precio=(parseFloat(element.children[2].children[0].value.replace(/,/g, "")))?parseFloat(element.children[2].children[0].value.replace(/,/g, "")):0
+        let suma=parseFloat(element.children[1].children[0].value.replace(/,/g, ""))*precio
+        console.log(element.children[3].children[0].value)
+        let descuento=(element.children[3].children[0].value)?(suma-((parseFloat(element.children[3].children[0].value)*suma)/100)):suma
+        acumulador=acumulador+parseFloat(descuento.toFixed(2))
         /* console.log(acumulador) */
-        element.children[3].innerHTML=separator(suma.toFixed(2))
+        element.children[4].innerHTML=`<h5>${separator(descuento.toFixed(2))}</h5>`
         document.getElementById("total").innerHTML=separator(acumulador.toFixed(2))
         document.getElementById("segundoTotal").innerHTML=separator(acumulador.toFixed(2))
         no=false
@@ -219,13 +234,15 @@ async function guardarVenta(tipoPago) {
         let ventas=[]
         document.getElementById("ProductosVender").children.forEach((element)=>{
             /* primero el id */
-            /* console.log(element.children[0]) */
+            console.log(element.children[3].children[0].value)
             venta.push(element.children[1].children[1].value.replace(/,/g, ""))
             venta.push(element.children[0].innerHTML.replace(/,/g, ""))
             venta.push(element.children[1].children[0].value.replace(/,/g, ""))
             venta.push(element.children[2].children[0].value.replace(/,/g, ""))
+            venta.push(element.children[3].children[0].value)
             /* venta[array()].push(element.children[2].children[0].value) */
             ventas.push(venta)
+            console.log(venta)
             console.log(descontarStock(venta[0],venta[2]))
             venta=[]
         })
@@ -597,7 +614,8 @@ function imprimirElemento(){
   document.getElementById("montoExtra").addEventListener("click",()=>{
    
    let nombreExtra=prompt("Ingrese un nombre para un producto")
-    if(nombreExtra){
+   nombreExtra=(nombreExtra)?nombreExtra:"Varios"
+  
         
         
    
@@ -608,12 +626,21 @@ function imprimirElemento(){
                     celda2 = document.createElement("td");
                     celda3 = document.createElement("td");
                     celda4 = document.createElement("td");
+                    celda4.classList.add("subTotalTable")
                     celda5 = document.createElement("td");
+                    celda6 = document.createElement("td");
+                    celda5.style="text-align:center;"
                     input1 = document.createElement("input")
                     input2 = document.createElement("input")
+                    input4 = document.createElement("input")
+                    input1.classList.add("inputVenta")
+                    input2.classList.add("inputVenta")
+                    input4.classList.add("inputVenta")
+                    input4.readOnly = true;
+                    input4.style="background: #dbdbdb;"
                     input1.value=1
                     input1.type="number"
-                    input1.style.width="71px"
+                    /* input1.style.width="71px" */
                     
                     input1.addEventListener("change", async()=>{
                        await sumarTodo()
@@ -621,14 +648,15 @@ function imprimirElemento(){
                     input1.addEventListener("keyup",async ()=>{
                        await sumarTodo()
                     })
+                 
                     let maOmi=0
                    
                         
                       
         
-                    input2.value=separator(maOmi)
+                    input2.value=""
                     input2.type="number"
-                    input2.style.width="87px"
+                    /* input2.style.width="87px" */
                     input2.addEventListener("change",async ()=>{
                         this.value=separator(maOmi)
                        await sumarTodo()
@@ -649,6 +677,7 @@ function imprimirElemento(){
                     celda1.appendChild(textoCelda1);
                     celda2.appendChild(input1);
                     celda2.appendChild(input3); 
+                    celda6.appendChild(input4);
                     celda3.appendChild(input2);
                     
                     celda5.innerHTML=`<button onclick="deleteTdTable(this)" class="btn btn-danger btn-sm">x</button>`
@@ -656,6 +685,7 @@ function imprimirElemento(){
                     fila.appendChild(celda1);
                     fila.appendChild(celda2);
                     fila.appendChild(celda3);
+                    fila.appendChild(celda6);
                     fila.appendChild(celda4);
                     fila.appendChild(celda5);
                    /*  let tr=`
@@ -674,12 +704,7 @@ function imprimirElemento(){
                     input2.focus()
     
             
-    
-        
-    }
-   
-   
-       
+      
 
     
 })
@@ -1006,12 +1031,21 @@ async function interesTarjeta(e=1,tituloxdddd="Tarjeta",porcentajeInteres=8){
     celda2 = document.createElement("td");
     celda3 = document.createElement("td");
     celda4 = document.createElement("td");
+    celda4.classList.add("subTotalTable")
     celda5 = document.createElement("td");
+    celda6 = document.createElement("td");
+    celda5.style="text-align:center;"
     input1 = document.createElement("input")
     input2 = document.createElement("input")
+    input4 = document.createElement("input")
+    input1.classList.add("inputVenta")
+    input2.classList.add("inputVenta")
+    input4.classList.add("inputVenta")
+    input4.readOnly = true;
+    input4.style="background: #dbdbdb;"
     input1.value=1
     input1.type="number"
-    input1.style.width="71px"
+    /* input1.style.width="71px" */
     
     input1.addEventListener("change", async()=>{
        await sumarTodo()
@@ -1026,7 +1060,7 @@ async function interesTarjeta(e=1,tituloxdddd="Tarjeta",porcentajeInteres=8){
 
     input2.value=redondearDecena(separator(numeroTotalMasInteres.toFixed(0)))
     input2.type="number"
-    input2.style.width="87px"
+    /* input2.style.width="87px" */
     input2.addEventListener("change",async ()=>{
         this.value=redondearDecena(separator(numeroTotalMasInteres.toFixed(0)))
        await sumarTodo()
@@ -1047,6 +1081,7 @@ async function interesTarjeta(e=1,tituloxdddd="Tarjeta",porcentajeInteres=8){
     celda1.appendChild(textoCelda1);
     celda2.appendChild(input1);
     celda2.appendChild(input3); 
+    celda6.appendChild(input4);
     celda3.appendChild(input2);
     
     celda5.innerHTML=`<button onclick="deleteTdTable(this)" class="btn btn-danger btn-sm">x</button>`
@@ -1054,6 +1089,7 @@ async function interesTarjeta(e=1,tituloxdddd="Tarjeta",porcentajeInteres=8){
     fila.appendChild(celda1);
     fila.appendChild(celda2);
     fila.appendChild(celda3);
+    fila.appendChild(celda6);
     fila.appendChild(celda4);
     fila.appendChild(celda5);
    /*  let tr=`

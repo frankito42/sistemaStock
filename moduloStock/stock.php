@@ -79,6 +79,7 @@ $articulos=$articulos->fetchAll(PDO::FETCH_ASSOC);
                         <th>Proveedor</th>
                         <th>Laboratorio</th>
                         <th>Cod</th>
+                        <th>Vence</th>
                         
                         <!-- <th>Vence</th> -->
                     <!--     <th>Img</th> -->

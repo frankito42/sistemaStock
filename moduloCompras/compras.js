@@ -137,49 +137,13 @@ function addNewProductFrom(id) {
                 /* el primer input es el de porcentaje */
                 /* diva.insertBefore(input,input2); */
             }else if(index==5){
-               /*  let input2 = document.createElement("input");
-                input2.type = "number";
-                input2.step="0.01"
-                input2.name = "preciomayor[]";
-                input2.onkeyup = sumarTodoTodito;
-                input2.style.display = "none";
-                
-                
-                
-                let input3 = document.createElement("input");
-                input3.className="form-control"
-                input3.required=true
-                input3.name="mayo[]"
-                input3.type = "number";
-                input3.step="0.01"
-                input3.style.width="44%"
-                input3.style.display="inline"
-                input3.style.marginRight="2%"
-                input3.value=data.mayorCentaje
-                input3.onkeyup = sumarTodoTodito;
+                let vence = document.createElement("input");
+                vence.type = "date";
+                vence.name = "vence[]";
+           
                 td=document.createElement('td')
-                
                 tr.appendChild(td)
-
-                let p = document.createElement("p");
-                p.innerText = "$0";
-                p.style.color = "rgb(0 206 84 / 97%)";
-                p.style.fontSize = "130%";
-                p.style.background = "#ffc4f2";
-                p.style.borderRadius = "5px";
-                p.style.padding = "1%";
-                p.style.display = "inline";
-                td.appendChild(p)
-                let div=`
-                <div class="md-form">
-                <input type="number" step="0.01" disabled class="form-control" id="mayo${data.articulo}">
-                <label style="max-width: max-content;" for="mayo${data.articulo}" class="active">Ganancia por mayor</label>
-                <span style="position: absolute;top: -190%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
-                </div>
-                `
-                td.innerHTML+=div
-                td.insertBefore(input3,td.firstChild);
-                td.appendChild(input2) */
+                td.appendChild(vence) 
             }else if(index==6){
               let boton=document.createElement('a')
               boton.className="btn btn-sm btn-primary borrar"
@@ -371,49 +335,13 @@ $(document).ready(function() {
                 /* el primer input es el de porcentaje */
                 /* diva.insertBefore(input,input2); */
             }else if(index==5){
-               /*  let input2 = document.createElement("input");
-                input2.type = "number";
-                input2.step="0.01"
-                input2.name = "preciomayor[]";
-                input2.onkeyup = sumarTodoTodito;
-                input2.style.display = "none";
-                
-                
-                
-                let input3 = document.createElement("input");
-                input3.className="form-control"
-                input3.required=true
-                input3.name="mayo[]"
-                input3.type = "number";
-                input3.step="0.01"
-                input3.style.width="44%"
-                input3.style.display="inline"
-                input3.style.marginRight="2%"
-                input3.value=data.mayorCentaje
-                input3.onkeyup = sumarTodoTodito;
+              let vence = document.createElement("input");
+                vence.type = "date";
+                vence.name = "vence[]";
+           
                 td=document.createElement('td')
-                
                 tr.appendChild(td)
-
-                let p = document.createElement("p");
-                p.innerText = "$0";
-                p.style.color = "rgb(0 206 84 / 97%)";
-                p.style.fontSize = "130%";
-                p.style.background = "#ffc4f2";
-                p.style.borderRadius = "5px";
-                p.style.padding = "1%";
-                p.style.display = "inline";
-                td.appendChild(p)
-                let div=`
-                <div class="md-form">
-                <input type="number" step="0.01" disabled class="form-control" id="mayo${data.articulo}">
-                <label style="max-width: max-content;" for="mayo${data.articulo}" class="active">Ganancia por mayor</label>
-                <span style="position: absolute;top: -190%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
-                </div>
-                `
-                td.innerHTML+=div
-                td.insertBefore(input3,td.firstChild);
-                td.appendChild(input2) */
+                td.appendChild(vence) 
             }else if(index==6){
               let boton=document.createElement('a')
               boton.className="btn btn-sm btn-primary borrar"
@@ -711,4 +639,26 @@ function ponerPorcentajeMayorReversa(e){
   let ecuacion=(((precioMayor-costo)*100)/costo).toFixed(2)
   porcentaje.value=ecuacion
   ganancia.value=(isNaN((precioMayor-costo).toFixed(2)))?0:(precioMayor-costo).toFixed(2)
+}
+
+document.getElementById("pagarFactura").addEventListener("submit",(e)=>{
+  e.preventDefault()
+  let formdata=new FormData(document.getElementById("pagarFactura"))
+  formdata.append("eg",localStorage.getItem("totalFacturaP"))
+  fetch('pagarFactura.php',{
+    method:"post",
+    body:formdata
+  })
+  .then(response => response.json())
+  .then((data) => {
+    console.log(data)
+    location.reload()
+  });
+})
+function abrirModalPagarFactura(idFactura,total) {
+  console.log(idFactura)
+  document.getElementById("idFactura").value=idFactura
+  localStorage.setItem("totalFacturaP",total)
+  document.getElementById("TOTALaPagar").innerHTML="Tota a pagar: $"+total
+  $("#centralModalSuccess").modal("show")
 }

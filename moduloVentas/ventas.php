@@ -107,7 +107,40 @@ require "../conn/conn.php";
       padding: 1%;
       border-radius: 77px;
     }
-
+    .inputVenta{
+      width: 100%;
+      border: 2px solid;
+      outline: none;
+      text-align: center;
+      padding: 2%;
+      border-radius: 5px;
+      border-color: #32cfd7;
+    }
+    .subTotalTable{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 60px;
+    }
+    th div{
+      background: #0092a5;
+      border-radius: 5px;
+      color: #ffffff;
+      padding: 5px;
+    }
+    thead{
+      background: #00bcd4;
+    }
+    tr th:first-child {
+    border-radius: 6px 0px 0px 0px;
+}
+tr th:last-child {
+    border-radius: 0px 6px 0px 0px;
+}
+.modal-dialog {
+    max-width: 650px;
+    margin: 1.75rem auto;
+}
     </style>
 </head>
 <body>
@@ -139,14 +172,10 @@ require "../conn/conn.php";
                 <div class="col-sm-3">
                     
                     
-                    <!-- Basic dropdown -->
-                    <button class="btn btn-cyan dropdown-toggle mr-4" type="button" data-toggle="dropdown"
-                      aria-haspopup="true" aria-expanded="false">Opciones</button>
                     
-                    <div class="dropdown-menu">
-                      <a class="dropdown-item" id="montoExtra" href="#">Monto extra</a>
-                      <a class="dropdown-item" id="extraPorciento5" href="#">Tarjeta</a>
-                    </div>
+                      <button class="btn btn-cyan btn-sm" id="montoExtra" href="#">Monto extra</button>
+                      <button class="btn btn-cyan btn-sm" id="extraPorciento5" href="#">Tarjeta</button>
+                   
  
                 </div>
                 <div style="background: #00ff89;border-radius: 5px;padding: 0.5%;box-shadow: 0px 0px 20px 3px #00000014;" class="col-sm-6 text-center">
@@ -164,7 +193,7 @@ require "../conn/conn.php";
                         <label for="codigoDeBarra">Codigo de barra</label>
                         </div> 
                     </div>
-                    <div class="col">
+                    <div style="display: flex;align-items: center;" class="col">
                         <button id="btnEscanear" class="btn btn-blue btn-sm"><i class="fas fa-camera fa-3x"></i></button>  
                     </div>
             </div>
@@ -172,18 +201,19 @@ require "../conn/conn.php";
             <div class="table-responsive">
                 <table class="table table-sm table-hover">
                     <thead>
-                        <th>Nombre</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>subTotal</th>
-                        <th></th>
+                        <th class="font-weight-bold"><div style="width: 100%;">Nombre</div></th>
+                        <th class="font-weight-bold text-center"><div style="width: 100%;">Cantidad</div></th>
+                        <th class="font-weight-bold text-center"><div style="width: 100%;">Precio</div></th>
+                        <th class="font-weight-bold text-center"><div style="width: 100%;">Descuento</div></th>
+                        <th class="font-weight-bold text-center"><div style="width: 100%;">subTotal</div></th>
+                        <th class="font-weight-bold text-center"><div style="width: 100%;">accion</div></th>
                     </thead>
                     <tbody id="ProductosVender"> 
                         
                     </tbody>
                     <tfoot>
-                        <td colspan="3">TOTAL $$$$$$</td>
-                        <td id="total">0</td>
+                        <td class="font-weight-bold" colspan="4">TOTAL $</td>
+                        <td class="text-center"><h4 id="total">0</h4></td>
                         <td></td>
                     </tfoot>
                 </table>
@@ -253,7 +283,7 @@ require "../conn/conn.php";
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-      </div>
+      </div> 
       <div id="eligeProductoNombre" class="modal-body">
                  <div style="margin: -2%;" class="md-form form-group">
                     <i class="fa fa-search prefix"></i>

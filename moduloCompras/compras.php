@@ -18,8 +18,10 @@ $articulos=$articulos->fetchAll(PDO::FETCH_ASSOC);
 
 
 
-$sqlEntradas="SELECT entra.`idEntrada`,SUM(factu.cantidad*factu.costo) as totalCosto, entra.`fecha`, entra.`nFactura`, entra.`observacion`, entra.`idProve`, entra.`keyLaboratorio`, entra.`transporte`, entra.`idEstablecimiento` FROM `entrada` as entra 
-JOIN facturaentrada as factu on factu.idEntrada=entra.`idEntrada` where MONTH(entra.`fecha`)=MONTH(NOW()) and idEstablecimiento = 1
+$sqlEntradas="SELECT p.nombreP,entra.metodoPago,entra.estado,entra.`idEntrada`,SUM(factu.cantidad*factu.costo) as totalCosto, entra.`fecha`, entra.`nFactura`, entra.`observacion`, entra.`idProve`, entra.`keyLaboratorio`, entra.`transporte`, entra.`idEstablecimiento` FROM `entrada` as entra 
+left JOIN facturaentrada as factu on factu.idEntrada=entra.`idEntrada`
+left JOIN proveedores as p on p.idProveedor=entra.idProve
+where MONTH(entra.`fecha`)=MONTH(NOW()) and idEstablecimiento = 1
 GROUP BY `idEntrada` order by entra.idEntrada desc";
 $entradas=$conn->prepare($sqlEntradas);
 $entradas->execute();
@@ -64,21 +66,29 @@ $proveedores=$proveedores->fetchAll(PDO::FETCH_ASSOC);
       <table class="table table-hover">
         <thead style="background: #da70b9d1;">
           <tr>
-            <th scope="col">Fecha</th>
-            <th scope="col">N° factura</th>
-            <th scope="col">Observacion</th>
-            <th scope="col">Costo total</th>
-            <th scope="col"></th>
+            <th style="font-weight: bold;" scope="col">N° factura</th>
+            <th style="font-weight: bold;" scope="col">Observacion</th>
+            <th style="font-weight: bold;" scope="col">Costo total</th>
+            <th style="font-weight: bold;" scope="col">Metodo de pago</th>
+            <th style="font-weight: bold;" scope="col">Proveedor</th>
+            <th style="font-weight: bold;" scope="col"></th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($entradas as $key):?>
-          <tr id="entrada<?php echo $key['idEntrada']?>">
-            <td scope="row" style="white-space: nowrap;" ><?php echo $key['fecha']?></td>
-            <td><?php echo $key['nFactura']?></td>
+          <tr style="background:<?php echo ($key['estado']==0)?"#ffb3b3":""?>;" id="entrada<?php echo $key['idEntrada']?>">
+            <td>Fecha <?php echo $key['fecha']?> <br> NRO: <?php echo $key['nFactura']?></td>
             <td><?php echo $key['observacion']?></td>
             <td><?php echo $key['totalCosto']?></td>
-            <td><a href="detalleCompra.php?idEntrada=<?php echo $key['idEntrada']?>" class="btn btn-blue btn-sm">VER</a> <a onclick="abrirModalBorrar(<?php echo $key['idEntrada']?>,'<?php echo $key['fecha'];?>','<?php echo $key['nFactura'];?>','<?php echo $key['observacion'];?>')" class="btn btn-danger btn-sm" hrefs="moduloCompras/borrarEntradaCompleta.php?idEntrada=">x</a></td>
+            <td><span style="padding:5%;border-radius:5px;background:#2bbbad;color:white;"><?php echo $key['metodoPago']?></span></td>
+            <td><?php echo $key['nombreP']?></td>
+            <td>
+              <a href="detalleCompra.php?idEntrada=<?php echo $key['idEntrada']?>" class="btn btn-blue btn-sm">VER</a> 
+              <a onclick="abrirModalBorrar(<?php echo $key['idEntrada']?>,'<?php echo $key['fecha'];?>','<?php echo $key['nFactura'];?>','<?php echo $key['observacion'];?>')" class="btn btn-danger btn-sm">x</a>
+              <?php if($key['estado']==0){?>
+                <a class="btn btn-success btn-sm" onclick="abrirModalPagarFactura(<?php echo $key['idEntrada']?>,<?php echo $key['totalCosto']?>)"><i class="fa-brands fa-google-pay fa-3x"></i></a>
+              <?php }?>
+            </td>
           </tr>
           <?php endforeach?>
         </tbody>
@@ -222,6 +232,7 @@ $proveedores=$proveedores->fetchAll(PDO::FETCH_ASSOC);
         <th>Cantidad</th>
         <th>Costo</th>
         <th>Porcentaje / precio de venta</th> 
+        <th>Vencimiento</th> 
         <!-- <th>Venta por mayor</th> -->
         <th></th>
         </thead>
@@ -249,7 +260,49 @@ $proveedores=$proveedores->fetchAll(PDO::FETCH_ASSOC);
     <!-- ////////////////////////////////////////////////////////////////////// -->
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
+    <div class="modal fade" id="centralModalSuccess" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-notify modal-success" role="document">
+    <!--Content-->
+    <div class="modal-content">
+      <!--Header-->
+      <div class="modal-header">
+        <p class="heading lead">Pagar factura</p>
 
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true" class="white-text">&times;</span>
+        </button>
+      </div>
+
+      <!--Body-->
+      <div class="modal-body">
+        <form id="pagarFactura">
+        <div class="text-center">
+          <i class="fas fa-check fa-4x mb-3 animated rotateIn"></i>
+          <input type="text" style="display: none;" name="idFactura" id="idFactura">
+          <input type="text" style="display: none;" name="totalFactura" id="totalFactura">
+          <select name="metodoPago" required class="browser-default custom-select">
+            <option selected value="" >Metodos de pago</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Cuenta coriente">Cuenta coriente</option>
+          </select>
+          <br>
+          <br>
+          <h4 id="TOTALaPagar"></h4>
+        </div>
+      </div>
+
+      <!--Footer-->
+      <div class="modal-footer justify-content-center">
+        <a type="button" class="btn btn-outline-success waves-effect" data-dismiss="modal">Cerrar</a>
+        <button type="submit" class="btn btn-success">Confirmar pago</button>
+        </form>
+      </div>
+    </div>
+    <!--/.Content-->
+  </div>
+</div>
+<!-- Central Modal Medium Success-->
   
 
 

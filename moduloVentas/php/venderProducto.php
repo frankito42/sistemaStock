@@ -7,8 +7,10 @@ $userEsta=json_decode($_POST['userEsta']);
 $_SESSION['imprimir']=$productos;
 $total=0;
 $tipoPago=json_decode($_POST['tipoPago']);
+$pre=0;
 foreach ($productos as $key) {
-    $total+=$key[2]*$key[3];
+    $pre=($key[4])?$key[3]-(($key[4]*$key[3])/100):$key[3];
+    $total+=$key[2]*$pre;
     $cantidad=$key[2];
     $sqlTraerArticulo="UPDATE `articulos` SET `cantidad`=cantidad-:canti WHERE `articulo`=:id";
     $producto=$conn->prepare($sqlTraerArticulo);
@@ -37,7 +39,8 @@ foreach ($productos as $key) {
     $insertDetailVenta->bindParam(":idVenta",$idVenta);
     $insertDetailVenta->bindParam(":nombre",$key[1]);
     $insertDetailVenta->bindParam(":cantidadV",$key[2]);
-    $insertDetailVenta->bindParam(":precio",$key[3]);
+    $pre=($key[4])?$key[3]-(($key[4]*$key[3])/100):$key[3];
+    $insertDetailVenta->bindParam(":precio",$pre);
     $insertDetailVenta->bindParam(":fecha",$fecha);
     $insertDetailVenta->bindParam(":idArticulo",$key[0]);
     $insertDetailVenta->execute();

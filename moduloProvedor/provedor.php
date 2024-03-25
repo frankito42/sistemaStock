@@ -2,9 +2,9 @@
 session_start();
 $local="";
 require "../conn/conn.php";
-if(!isset($_SESSION['user'])){
+/* if(!isset($_SESSION['user'])){
     header("location:../Login/index.php");
-}
+} */
 ?>
 <!DOCTYPE html>
 <html lang="en">
