@@ -15,16 +15,42 @@ require "../conn/conn.php";
     <link rel="stylesheet" href="../mdb/css/bootstrap.min.css">
     <link rel="stylesheet" href="../mdb/css/mdb.min.css">
     <link rel="stylesheet" href="../mdb/css/all.min.css">
+    <link rel="stylesheet" href="../lib/toastr.min.css">
     <title>Proveedores</title>
+    <style>
+      .optionCheck:hover{
+        background: #e8e8e8 !important;
+      }
+      .modal-dialog {
+    max-width: 900px;
+    margin: 1.75rem auto;
+}
+.cardList{
+  margin:0.5%;
+  display: flex;
+  padding: 3%;
+  background: #00c8833b;
+  border-radius: 5px;
+  justify-content: space-between;
+}
+    </style>
 </head>
 <body>
+    <div style="position: fixed;bottom: 1%;z-index: 9;right: 1%;">
+      <button style="background:#31a3a2;color:white;" data-toggle="modal" data-target="#verPedidos" class="btn">Ver pedidos</button>
+    </div>
     <section>
       <?php require "../navBar/navCarpeta.php";?>
     </section>
     <div class="container">
-    <div style="margin-bottom: 1%;" class="row">
-            <button class="btn btn-blue btn-lg" data-toggle="modal" data-target="#centralModalSuccess">Agregar proveedor</button>
+      <div style="margin-bottom: 1%;" class="row">
+        <div class="col">
+          <button class="btn btn-blue btn-lg" data-toggle="modal" data-target="#centralModalSuccess">Agregar proveedor</button>
         </div>
+        <div class="col text-right">
+          <button class="btn btn-blue btn-lg" data-toggle="modal" data-target="#modalListaPedido">Crear un nuevo pedido</button>
+        </div>
+      </div>
     </div>
     <div id="proveedores" class="container text-center text-white">
     
@@ -35,6 +61,124 @@ require "../conn/conn.php";
     background-color: #F5F7FA;
 }
 </style>
+<!-- ////////////////////////////////////MODAL MODAL MODAL MODAL//////////////////////////////// -->
+<!-- ////////////////////////////////////MODAL MODAL MODAL MODAL//////////////////////////////// -->
+
+<div class="modal fade" id="modalListaPedido" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+   aria-hidden="true">
+   <div style="margin: 5.75rem auto !important;" class="modal-dialog modal-notify" role="document">
+     <!--Content-->
+     <div class="modal-content">
+       <!--Header-->
+       <div style="background:#0084c8;margin-left: 5%;margin-right: 5%;margin-top: -5%;box-shadow: 0px 0px 20px 0px #00000073;" class="modal-header">
+        <p style="padding: 3%;" class="heading lead">Nuevo pedido</p>
+        
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true" class="white-text">&times;</span>
+        </button>
+      </div>
+      
+      <form id="formPedido">
+       <!--Body-->
+       <div class="modal-body pt-0">
+          
+          <div class="row">
+            <div class="col-8">
+              <div class="row">
+                <div class="col-12">
+                  <div class="md-form">
+                    <select required style="width: 100%;padding: 1%;border-radius: 5px;border: 0px;box-shadow: 1px 1px 1px 1px #0084c8;outline: none;" name="proveedorList" id="proveedorList">
+                      
+                    </select>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="md-form">
+                    <input type="text" name="searchList" id="searchList" value="" class="form-control">
+                    <label for="search">Buscar producto</label>
+                  </div>
+                </div>
+                <div id="listaCheckBox" style=" height: 200px;overflow-x: hidden;overflow-y: scroll;" class="col-12">
+                </div>
+                <span style="padding-left: 3%;">seleccionados <b id="seleccionados">0</b></span>
+              </div>
+            </div>
+            <div class="col-4">
+            <div style="background: #ececec;border-radius:5px;" class="mt-3">
+                      <div style="padding: 1%;margin:1%;">
+                        <h3 style="text-align: center;">Lista de articulos</h3>
+                        <div id="listaCargada" style="display: flex;flex-direction: column;overflow-y: scroll;max-height: 300px;">
+                          
+                        </div>
+                      </div>
+                  </div>
+            </div>
+          </div>
+          
+
+         </div>
+       
+
+       <!--Footer-->
+       <div class="modal-footer justify-content-center">
+         <a type="button" data-dismiss="modal" class="btn btn-danger">Cerrar</a>
+         <button type="submit" class="btn btn-success">Guardar</button>
+       </div>
+       </form>
+     </div>
+     <!--/.Content-->
+   </div>
+ </div>
+ <!-- Central Modal Medium Success-->
+<div class="modal fade" id="verPedidos" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+   aria-hidden="true">
+   <div style="margin: 5.75rem auto !important;" class="modal-dialog modal-notify" role="document">
+     <!--Content-->
+     <div class="modal-content">
+       <!--Header-->
+       <div style="background:#31a3a2;margin-left: 5%;margin-right: 5%;margin-top: -5%;box-shadow: 0px 0px 20px 0px #00000073;" class="modal-header">
+        <p style="padding: 3%;" class="heading lead">Todos los pedidos</p>
+        
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true" class="white-text">&times;</span>
+        </button>
+      </div>
+      
+      
+       <!--Body-->
+       <div class="modal-body ">
+          
+          
+          <div id="listaPedidosXd" class="row">
+            
+          </div>
+          
+
+         </div>
+       
+
+       <!--Footer-->
+       <div class="modal-footer justify-content-center">
+         <a type="button" data-dismiss="modal" class="btn btn-danger">Cerrar</a>
+         <button type="submit" class="btn btn-success">Guardar</button>
+       </div>
+     
+     </div>
+     <!--/.Content-->
+   </div>
+ </div>
+ <!-- Central Modal Medium Success-->
+
+
+
+
+
+
+
+
+
+
+<!-- ////////////////////////////////////MODAL MODAL MODAL MODAL//////////////////////////////// -->
 <!-- ////////////////////////////////////MODAL MODAL MODAL MODAL//////////////////////////////// -->
 <!-- ////////////////////////////////////MODAL MODAL MODAL MODAL//////////////////////////////// -->
 <!-- ////////////////////////////////////MODAL MODAL MODAL MODAL//////////////////////////////// -->
@@ -169,6 +313,7 @@ input[type="text"]{
 <script src="../mdb/js/bootstrap.min.js"></script>
 <script src="../mdb/js/mdb.min.js"></script>
 <script src="../mdb/js/all.min.js"></script>
+<script src="../lib/toastr.min.js"></script>
 <script src="js/proveedor.js?pancholo=pancholo"></script>
 <script src="../localstorage/localstorage.js?pancholo=pancholo"></script>
 </html>

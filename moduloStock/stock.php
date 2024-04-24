@@ -2,11 +2,6 @@
 session_start();
 $local="";
 require "../conn/conn.php";
-$sqlTodosLosArticulos="SELECT a.`articulo`, a.`nombre`, a.`costo`, a.`stockmin`, a.`cantidad`, a.`descripcion`, a.`imagen`, a.`categoria`, a.`codBarra`, a.`precioVenta`, a.`idEsta`, a.`idProveedor`,e.nombreEsta,p.nombreP FROM `articulos` =a LEFT OUTER join proveedores=p on p.idProveedor=a.idProveedor 
-JOIN establecimiento =e ON a.idEsta=e.idEsta where a.idEsta=1";
-$articulos=$conn->prepare($sqlTodosLosArticulos);
-$articulos->execute();
-$articulos=$articulos->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,79 +12,138 @@ $articulos=$articulos->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../mdb/css/bootstrap.min.css">
     <link rel="stylesheet" href="../mdb/css/mdb.min.css">
     <link rel="stylesheet" href="../mdb/css/all.min.css">
+    <link rel="stylesheet" href="../lib/toastr.min.css">
     <title>Inicio</title>
 </head>
 <body>
+    <style>
+        .texto-acortado {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    display: inline-block;
+}
+        .lapiz{
+           
+            
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            width: 50%;
+            justify-content: center;
+
+        }
+        .lapiz:hover{
+            background: #5fafff;
+            cursor: pointer;
+        }
+        .vasurero{
+           
+            
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            width: 50%;
+            justify-content: center;
+
+        }
+        .vasurero:hover{
+            background: #ff5f5f;
+            cursor: pointer;
+        }
+        .qr{
+           
+            color: #565555;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            width: 50%;
+            justify-content: center;
+
+        }
+        .qr:hover{
+            background: #43ac93;
+            cursor: pointer;
+            color: black;
+        }
+    </style>
     <section>
         <?php require "../navBar/navCarpeta.php";?>
     </section>
     
     <section>
         <div class="container">
-        <div class="row">
-            <div class="col">
-              
-                <!-- Basic dropdown -->
-                <button class="btn btn-blue btn-lg btn-block" type="button" data-toggle="modal" data-target="#addnew">Nuevo producto</button>
+            <div class="row">
+                <div style="display: flex;justify-content: center;align-items: center;" class="col">
                 
+                    <!-- Basic dropdown -->
+                    <button class="btn btn-blue btn-sm btn-block" type="button" data-toggle="modal" data-target="#addnew">Nuevo producto</button>
+                    
+                </div>
+                
+                
+                    <div style="display: flex;justify-content: center;align-items: center;" class="col-sm">
+                        <!-- Basic dropdown -->
+                    <button class="btn btn-blue btn-sm btn-block dropdown-toggle mr-4" type="button" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">Actualizar</button>
+                    
+                    <div class="dropdown-menu">
+                    <a class="dropdown-item" data-toggle="modal" data-target="#addEntradaProducto">Actualizar precios</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" data-toggle="modal" data-target="#modalPorcentaje">Actualizar precios general</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" data-toggle="modal" data-target="#modalPorcentajeLaboratorio">Actualizar por categoria</a>
+                    </div>
+                    <!-- Basic dropdown -->
+                    </div>
+
+                
+               
+        </div>
+        <div class="d-flex" style="justify-content: space-between;align-items: center;">
+            
+            <div>
+                <button id="prev" class="btn btn-sm btn-brown">prev</button>
+                <button id="next" class="btn btn-sm btn-brown">next</button>
             </div>
-            
-            
-                <div style="display:none;" class="col-sm">
-                    <div class="md-form form-group">
-                        <select id="establecimientos" class="browser-default custom-select">
-                        </select>
+            <div>
+                    <div style="margin: 0;" class="md-form form-group">
+                        <i class="fa fa-search prefix"></i>
+                        <input style="margin-bottom: 0.5rem;" type="text" id="filtroProductos" class="mt-1 form-control validate">
+                        <label for="filtroProductos" >Nombre del producto</label>
                     </div>
                 </div>
-                <div class="col-sm">
-                    <!-- Basic dropdown -->
-                <button class="btn btn-blue btn-lg btn-block dropdown-toggle mr-4" type="button" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false">Actualizacion de precios</button>
-                
-                <div class="dropdown-menu">
-                  <a class="dropdown-item" data-toggle="modal" data-target="#addEntradaProducto">Actualizar precios</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" data-toggle="modal" data-target="#modalPorcentaje">Actualizar precios general</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" data-toggle="modal" data-target="#modalPorcentajeLaboratorio">Actualizar por categoria</a>
-                </div>
-                <!-- Basic dropdown -->
-                    <button style="display:none;" data-toggle="modal" style="background:#a160b6e6;" data-target="#modalNewEstablecimiento" class="btn btn-sm"><i class="fas fa-plus fa-2x"></i></button>
-                </div>
 
-            
-            <div class="col">
-                <div class="md-form form-group">
-                    <i class="fa fa-search prefix"></i>
-                    <input type="text" id="filtroProductos" class="form-control validate">
-                    <label for="filtroProductos" >Nombre del producto</label>
+        </div>
+        <div style="margin-bottom: 10%;" class="row">
+            <div class="col-12 mb-1">
+                <div class="row" style="background: #1976d2;display: flex;border-radius: 5px;box-shadow: 1px 1px 1px 1px #025db7;justify-content: space-around;color: white;padding: 1%;">
+                    <div class="col-1"><span>Imagen</span></div>
+                    <div class="col-4 text-center"><span>Nombre</span></div>
+                    <div class="col-1"><span>Costo</span></div>
+                    <div class="col-1"><span>Venta</span></div>
+                    <div class="col-1"><span>Stock</span></div>
+                    <div class="col-1 d-none d-md-block"><span>Proveedor</span></div>
+                    <div class="col-1 d-none d-md-block"><span>Laboratorio</span></div>
+                    <div class="col-1" style="display:none;"><span>Cod</span></div>
+                    <div class="col-1  d-none d-md-block"><span>Vence</span></div>
                 </div>
+            </div>
+            <div id="articulosTabla" class="col-12">
+               
             </div>
         </div>
-        <div class="table-responsive">
-            <table id="mytable" class="table table-hover">
-                    <thead style="background: #19d6f5b0;">
-                        <th>Nombre</th>
-                        <th>Costo</th>
-                        <th>Precio de venta</th>
-                     <!--    <th style="white-space: nowrap;">Peso</th> -->
-                        <th>Stock</th>
-                        <!-- <th>Establecimiento</th> -->
-                        <th style="display:none;">Categoria</th>
-                        <th>Proveedor</th>
-                        <th>Laboratorio</th>
-                        <th>Cod</th>
-                        <th>Vence</th>
-                        
-                        <!-- <th>Vence</th> -->
-                    <!--     <th>Img</th> -->
-                        <th>Acción</th>
-                    </thead>
-                    <tbody id="articulosTabla">
-                    
-                    </tbody>
-                </table>
-            </div>
+
+
+
+
+
+
+
         </div>
     </section>
     <section>
@@ -205,9 +259,7 @@ $articulos=$articulos->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                     <div class="row">
-                        <div id="codeDiplicado" class="col">
-
-                        </div>
+                        <input type="file" name="file" id="file">
                     </div>
             </div> 
             <!-- /////////////////////////////ERROR ERROR//////////////////////////////////////////// -->
@@ -400,12 +452,10 @@ input[type="text"]{
       <div class="md-form text-center">
 
 
-
-          <select autofocus onchange="addNewProductFrom(this.value)" class="mdb-select md-form" searchable="Buscar">
-          <option value="" disabled selected>Productos</option>
-          <?php foreach ($articulos as $key):?>
-          <option value="<?php echo $key['articulo']?>"><?php echo $key['nombre']?> (<?php echo "En stock: ".$key['cantidad']?> <?php echo ($key['nombreP']=="")?"":"Proveedor: ".$key['nombreP']?> <?php echo " Galpon: ".$key['nombreEsta']?>)</option>
-          <?php endforeach?>
+ 
+          <select autofocus onchange="addNewProductFrom(this.value)" id="selectSeachJs" class="mdb-select md-form" searchable="Buscar">
+        
+        
           </select>
 
 
@@ -452,7 +502,45 @@ input[type="text"]{
 <!-- Modal -->
 
 
-
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<div class="modal fade" id="modalQR" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div style="background: #ad4c4c;" class="modal-header">
+        <h5 style="background: #872f2f;padding: 1%;border-radius: 5px;color: white;font-weight: bold;" class="modal-title" id="exampleModalLabel">Imprimir QR</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+            <div style="display: flex;text-align: center;justify-content: center;" class="col">
+                <img style="padding: 5%;border-radius: 5px;box-shadow: 0px 0px 10px 0px #00000036;" alt="C贸digo QR" id="codigoQR">
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button id="printtxd" onclick="imprimir()" type="button" class="btn btn-primary">Imprimir</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
+<!-- //////////////////////////////////////// -->
 
 
 
@@ -471,6 +559,8 @@ input[type="text"]{
 <script src="../mdb/js/bootstrap.min.js"></script>
 <script src="../mdb/js/mdb.min.js"></script>
 <script src="../mdb/js/all.min.js"></script>
+<script src="../lib/toastr.min.js"></script>
+<script src="https://unpkg.com/qrious@4.0.2/dist/qrious.js"></script>
 <script src="js/stock.js?pinocho=pinocho"></script>
 <script src="js/script.js?pinocho=pinocho"></script>
 <script src="../localstorage/localstorage.js?pocnho=pocnho"></script>

@@ -2,12 +2,12 @@
 session_start();
 require "../../conn/conn.php";
 
-$sqlFamilias="SELECT * FROM `familia`";
-$familias=$conn->prepare($sqlFamilias);
-$familias->execute();
-$familias=$familias->fetchAll(PDO::FETCH_ASSOC);
+$sqlClientes="SELECT * FROM `clientes`";
+$clientes=$conn->prepare($sqlClientes);
+$clientes->execute();
+$clientes=$clientes->fetchAll(PDO::FETCH_ASSOC);
 
-echo json_encode($familias);
+echo json_encode($clientes);
 
 
 

@@ -2,11 +2,30 @@
 require "../../conn/conn.php";
 $articulo = $_POST;
 
+if (isset($_FILES['image'])) {
+    $image = $_FILES['image'];
+    $name = $image['name'];
+    $tmp_name = $image['tmp_name'];
+    $direccion="../imagenesStock/$name";
+    $direccion2="imagenesStock/$name";
+  
+    move_uploaded_file($tmp_name, $direccion);
+  }else{
+      $direccion2="";
+  }
+
+
+
+
+
+
+
+
     $sqlAddNewProduct="INSERT INTO `articulos`(`nombre`, `costo`, `stockmin`,
-    `descripcion`, `categoria`, `codBarra`, `precioVenta`,
+    `descripcion`, `categoria`, imagen, `codBarra`, `precioVenta`,
     `idEsta`, `mayoritario`,keyTwoLabor) VALUES 
     (:nombre,:costo,:stockmin,
-    :desc,:cat,:cod,
+    :desc,:cat, :imagen,:cod,
     :precio,:idEsta,:mayo,:labor)";
     $addNewProduct=$conn->prepare($sqlAddNewProduct);
     $addNewProduct->bindParam(":nombre",$articulo['newNombreA']);
@@ -18,6 +37,7 @@ $articulo = $_POST;
     $addNewProduct->bindParam(":stockmin",$articulo['stockMinA']);
     $addNewProduct->bindParam(":desc",$articulo['descripcionNewA']);
     $addNewProduct->bindParam(":cat",$articulo['categoriaNew']);
+    $addNewProduct->bindParam(":imagen",$direccion2);
     $addNewProduct->bindParam(":cod",$articulo['codBarraNew']);
     $addNewProduct->bindParam(":precio",$resultado2);
     $esta=1;

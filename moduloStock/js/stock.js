@@ -1,16 +1,38 @@
-let todosLosArticulosCategorias
+let allArticulosLimitado
+let allArticulosTodos
 let allLaboratorios
+let categorias
+let proveedores
+let page = 1;
+let perPage = 3000;
 function cargando(){
-        document.getElementById("articulosTabla").innerHTML="<tr><td colspan='8'><h3 class='text-center'>Cargando...</h3></td></tr>"
+        document.getElementById("articulosTabla").innerHTML=`
+        <div class="row text-center mb-1" style="font-weight: bold;font-size: 150%;background: #33b5e5;display: flex;border-radius: 5px;box-shadow: 1px 1px 1px 1px #1c7fa3;justify-content: space-around;color: #ffffff;padding: 1%;">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Cargando...</span>
+              </div>
+          </div>
+        `
 }
 async function listarArticulos() {
     let esta=JSON.parse(localStorage.getItem("user")).establecimiento
-  await fetch('php/listarArticulos.php?establecimiento='+esta)
+  await fetch('php/listarArticulos.php?establecimiento='+esta+`&page=${page}&perpage=${perPage}`)
   .then(response => response.json())
   .then(async (data)=>{
     console.log(data)
       
-    return todosLosArticulosCategorias=data
+    return allArticulosLimitado=data
+  });
+    
+}
+async function listarArticulosTodos() {
+    let esta=JSON.parse(localStorage.getItem("user")).establecimiento
+  await fetch('php/listarArticulosTodos.php?establecimiento='+esta)
+  .then(response => response.json())
+  .then(async (data)=>{
+    console.log(data)
+      
+    return allArticulosTodos=data
   });
     
 }
@@ -19,6 +41,7 @@ async function listarProveedores() {
   .then(response => response.json())
   .then(async (data)=>{
     console.log(data)
+    proveedores=data
     let option=`<option value="" selected disabled>Seleccionar proveedor</option>`
     data.forEach(element => {
       option+=`<option value="${element.idProveedor}">${element.nombreP}</option>`
@@ -47,6 +70,8 @@ async function listarCategorias() {
   .then(response => response.json())
   .then(async (data)=>{
     console.log(data)
+    categorias=data
+    dibujarCategorias(data)
     let option=`<option value="" selected disabled>Seleccionar Categoria</option>`
     data.forEach(element => {
       option+=`<option value="${element.idCategoria}">${element.nombreCategoria}</option>`
@@ -62,11 +87,10 @@ async function subirPorcentajeEnPreciosProveedor() {
   let proveedor=document.getElementById("selectProvedorAumentar").value
   if(proveedor&&porcentaje){
     await fetch("php/aumentarPrecio.php?porcentaje="+porcentaje+"&idPro="+proveedor)
-          .then(respuesta => {
+          .then(async respuesta => {
                 $("#modalPorcentaje").modal("hide")
-                listarArticulos().then(async()=>{
-                  await traerPoductoGalpon(document.getElementById("establecimientos").value)
-                })
+                await listarArticulos()
+                dibujarTabla(allArticulosLimitado)
              }
           );
   }else{
@@ -93,13 +117,29 @@ document.getElementById("selectProvedorAumentar").addEventListener("click",()=>{
 
 
 $(document).ready(async function(){
+
+  document.getElementById('next').addEventListener('click', async () => {
+      page++;
+      cargando()
+      await listarArticulos();
+      await dibujarTabla(allArticulosLimitado)
+    });
+    
+    document.getElementById('prev').addEventListener('click', async () => {
+      if (page > 1) {
+        page--;
+        cargando()
+          await listarArticulos();
+          await dibujarTabla(allArticulosLimitado)
+      }
+  });
     
     document.getElementById("codActForm").addEventListener("submit",(e)=>{
     e.preventDefault()
     
     let codigo=document.getElementById('codigoBAc').value
 
-    let pro=todosLosArticulosCategorias[1]
+    let pro=allArticulosLimitado
 
     pro= pro.find((m) => m.codBarra === codigo);
     console.log(pro)
@@ -112,7 +152,7 @@ $(document).ready(async function(){
         
  
         let proveedor=``
-              todosLosArticulosCategorias[3].forEach(element => {
+              proveedores.forEach(element => {
                 proveedor+=`
                 <option ${(element.idProveedor==pro.idProveedor)?"selected":""} value="${element.idProveedor}">${element.nombreP}</option>
                 `
@@ -133,12 +173,7 @@ $(document).ready(async function(){
             
             let nombre=document.createTextNode(pro.nombre)
             if(index==0){
-                /* let img=document.createElement('img')
-                img.setAttribute("height", "80");
-                img.setAttribute("width", "80")
-                img.setAttribute("src", data.imagen.replace('../', ''))
-                td.appendChild(img)
-                tr.appendChild(td) */
+
             }else if(index==1){
                 td.appendChild(nombre)
                 tr.appendChild(td)
@@ -177,11 +212,7 @@ $(document).ready(async function(){
                 select.innerHTML=proveedor
                 select.name="prove[]"
                 select.classList.add("form-control")
-              
-              
-              
-              
-           
+
 
                 tr.style.position="relative"
                 td=document.createElement('td')
@@ -241,59 +272,9 @@ $(document).ready(async function(){
                 divGanancia.appendChild(labelGanancia)
                 td.appendChild(divGanancia)
                 sumaLocalIniciandoEnPorcentaje(input)
-               /*  let div=`
-              
-                <label style="max-width: max-content;" for="meno${data.articulo}" class="active">Ganancia</label>
-                <span style="z-index: 9999;position: absolute;top: -200%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
-                
-                `
-                td.innerHTML+=div */
-                /* el primer input es el de porcentaje */
-                /* diva.insertBefore(input,input2); */
-            }else if(index==5){
-               /*  let input2 = document.createElement("input");
-                input2.type = "number";
-                input2.step="0.01"
-                input2.name = "preciomayor[]";
-                input2.onkeyup = sumarTodoTodito;
-                input2.style.display = "none";
-                
-                
-                
-                let input3 = document.createElement("input");
-                input3.className="form-control"
-                input3.required=true
-                input3.name="mayo[]"
-                input3.type = "number";
-                input3.step="0.01"
-                input3.style.width="44%"
-                input3.style.display="inline"
-                input3.style.marginRight="2%"
-                input3.value=data.mayorCentaje
-                input3.onkeyup = sumarTodoTodito;
-                td=document.createElement('td')
-                
-                tr.appendChild(td)
 
-                let p = document.createElement("p");
-                p.innerText = "$0";
-                p.style.color = "rgb(0 206 84 / 97%)";
-                p.style.fontSize = "130%";
-                p.style.background = "#ffc4f2";
-                p.style.borderRadius = "5px";
-                p.style.padding = "1%";
-                p.style.display = "inline";
-                td.appendChild(p)
-                let div=`
-                <div class="md-form">
-                <input type="number" step="0.01" disabled class="form-control" id="mayo${data.articulo}">
-                <label style="max-width: max-content;" for="mayo${data.articulo}" class="active">Ganancia por mayor</label>
-                <span style="position: absolute;top: -190%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
-                </div>
-                `
-                td.innerHTML+=div
-                td.insertBefore(input3,td.firstChild);
-                td.appendChild(input2) */
+            }else if(index==5){
+           
             }else if(index==6){
               let boton=document.createElement('a')
               boton.className="btn btn-sm btn-primary borrar"
@@ -344,14 +325,37 @@ $(document).ready(async function(){
     
 })
   $("#filtroProductos").keyup(function(){
-  _this = this;
-  // Show only matching TR, hide rest of them
-  $.each($("#mytable tbody tr"), function() {
-  if($(this).text().toLowerCase().indexOf($(_this).val().toLowerCase()) === -1)
-  $(this).hide();
-  else
-  $(this).show();
-  });
+        // La palabra que estás buscando
+    let palabraBuscada = document.getElementById("filtroProductos").value;
+
+    // Obtén todos los elementos hijos del div
+    let articulos = document.querySelectorAll('#articulosTabla .row');
+
+    // Convierte la NodeList a un array para poder usar un bucle for
+    articulos = Array.from(articulos);
+
+    // Usa un bucle for para recorrer cada elemento
+    for (let i = 0; i < articulos.length; i++) {
+      console.log(articulos[i].children[0].children[0].innerHTML)
+        // Obtén el nombre del artículo
+        let nombreArticulo = articulos[i].children[0].children[0].innerHTML.toLowerCase();
+
+        // Verifica si el nombre contiene la palabra buscada
+        if(palabraBuscada){
+          if (nombreArticulo.includes(palabraBuscada.toLowerCase())) {
+              // Si la condición se cumple, oculta el artículo
+              articulos[i].style.display = 'flex';
+            } else {
+              // Si no se cumple la condición, muestra el artículo
+              articulos[i].style.display = 'none';
+            }
+          }else{
+              articulos[i].style.display = 'flex';
+
+        }
+    }
+
+
   });
 
 
@@ -359,14 +363,15 @@ $(document).ready(async function(){
  /*  console.log(document.getElementsByClassName("dropdown-content select-dropdown")) */
     cargando()
   await listarArticulos().then(async()=>{
-    await dibujarTabla(todosLosArticulosCategorias[1])
+    await dibujarTabla(allArticulosLimitado)
+    /* 
     await dibujarCategorias(todosLosArticulosCategorias[0])
-    await dibujarSelect(todosLosArticulosCategorias[2])
+    await dibujarSelect(todosLosArticulosCategorias[2]) */
     await listarProveedores()
     await listarLaboratorios()
     await listarCategorias()
-    
-    
+    await listarArticulosTodos() 
+    await dibujarSelectFiltro(allArticulosTodos)
     $('.mdb-select').materialSelect();
   })
   document.getElementsByClassName("dropdown-content select-dropdown").forEach((element)=>{
@@ -385,7 +390,7 @@ $(document).ready(async function(){
 
 
  async function abrirModalEdit(id) {
-  let filtroArray= todosLosArticulosCategorias[1].find((m) => parseInt(m.articulo) === parseInt(id));
+  let filtroArray= allArticulosLimitado.find((m) => parseInt(m.articulo) === parseInt(id));
   console.log("Es: " + filtroArray.nombre );
   
   /* creo el select de categorias en el modal editar */
@@ -396,14 +401,14 @@ $(document).ready(async function(){
       abrirModalEdit(id)
     }else{
       let optionsCategoria=``
-      todosLosArticulosCategorias[0].forEach(element => {
+      categorias.forEach(element => {
         optionsCategoria+=`
         <option ${(element.idCategoria==filtroArray.categoria)?"selected":""} value="${element.idCategoria}">${element.nombreCategoria}</option>
         `
       });
 
       let proveedor=``
-      todosLosArticulosCategorias[3].forEach(element => {
+      proveedores.forEach(element => {
         proveedor+=`
         <option ${(element.idProveedor==filtroArray.idProveedor)?"selected":""} value="${element.idProveedor}">${element.nombreP}</option>
         `
@@ -475,12 +480,7 @@ $(document).ready(async function(){
                               <label for="costoArticuloEdit${id}" class="active">Costo</label>
                             </div>
                           </div>
-                          <div style="display:none;" class="col">
-                            <div class="md-form">
-                              <input type="text" id="precioArticuloEdit${id}" onkeyup="separatorthis(this)" value="${separator(filtroArray.precioVenta)}" name="precioArticulo" class="form-control">
-                              <label for="precioArticuloEdit${id}" class="active">Peso</label>
-                            </div>
-                          </div>
+                    
                           <div class="col">
                             <div class="md-form">
                               <input type="text" id="precioMayo${id}" onkeyup="separatorthis(this)" value="${separator(filtroArray.mayoritario)}" name="precioArticulo" class="form-control">
@@ -541,64 +541,43 @@ $(document).ready(async function(){
   console.log(articulosStock)
   document.getElementById("totalProductos").innerHTML=articulosStock.length
   articulosStock.forEach(element => {
-    imagen=`<img style="width: 100%;" src="${element['imagen']}">`
-    /* <td>${element['costo']}</td>
-    <td>${element['descripcion']}</td>
-    <td>${element['diasPaVencer']} Dias</td>
-    <td>${element['nombreEsta']}</td>
-    */
-    /* if(element['diasPaVencer']<60){
-      tablaArticulos+=`
-      <tr style="background: #ff000030;">
-      <td>${element['nombre']}</td>
-      <td>${element['costo']}</td>
-      <td>${element['precioVenta']}</td>
-      <td>${element['mayoritario']}</td>
-      <td>${element['cantidad']}</td>
-      <td>${element['nombreCategoria']}</td>
-      <td>${imagen}</td>
-      
-      
-      
-      <td style="display: inherit;">
-      <button onclick="abrirModalEdit(${element['articulo']})" class="btn btn-blue"><i class="fas fa-pencil-alt fa-2x"></i></button>
-      <button onclick="deleteProduct(${element['articulo']},this)" class="btn btn-danger"><i class="fas fa-trash-alt fa-2x"></i></button>
-      </td>
-      </tr>
-      `
-    }else{ */
-      tablaArticulos+=`
-      <tr style="background:${(element['cantidad']<=5)?"#ffaaaa":""};">
-      <td>${element['nombre']}</td>
-      <td>${separator(element['costo'])}</td>
-      <td>${separator(element['mayoritario'])}</td>
-      <td style="display:none;">${separator(element['precioVenta'])}</td>
-      <td>${element['cantidad']}</td>
-      <td style="display:none;">${element['nombreCategoria']}</td>
-      <td>${(element['nombreP'])?element['nombreP']:""}</td>
-      <td>${(element['nombreLaboratorio'])?element['nombreLaboratorio']:""}</td>
-      <td>${element['codBarra']}</td>
-      <td><p>${(element['fechaVence'])?element['fechaVence']:""}<p>${calcularDias(element['fechaVence'])}</td>
-      <td style="display:none;">
   
-  <input style="display: block;" type="number" placeholder="Cambio" onkeyup="pesosGuarani(this)">
-    
-  <input style="display: block;" value="${separator(element['precioVenta'])}" type="text" placeholder="Peso" onkeyup="pesosGuarani(this),separatorthis(this)">
-  
-
-  <input style="display: block;" type="text" placeholder="Guarani" onkeyup="pesosGuarani(this)">
-
-      </td>
+      tablaArticulos+=`
       
-      <td style="display: inherit;">
-      <button onclick="abrirModalEdit(${element['articulo']})" class="btn btn-blue"><i class="fas fa-pencil-alt fa-2x"></i></button>
-      <button onclick="deleteProduct(${element['articulo']},this)" class="btn btn-danger"><i class="fas fa-trash-alt fa-2x"></i></button>
-      </td>
-      </tr>
-      `
-   /*  } */
+
+      <div class="row text-center mb-1" style="background:${(element['cantidad']<=3&&element['cantidad']>0)?"#d56363":""}${(element['cantidad']<=0)?"#d56363":""}${(element['cantidad']>3)?"#63ced5":""};display: flex;border-radius: 5px;box-shadow: 1px 1px 1px 1px ${(element['cantidad']<=3&&element['cantidad']>0)?"#bc1e1e":""}${(element['cantidad']<=0)?"#bc1e1e":""}${(element['cantidad']>3)?"#1bbac4":""};justify-content: space-around;color: #ffffff;padding: 1%;">
+          <div class="col-1">
+          <img style="width:50%;border-radius:100%;" src="${(element.imagen)?element.imagen:"imagen.png"}" />
+          </div>
+          <div class="col-4"  onclick="verSinPuntos(this)"><span class="${acortarTextoMasLargo(element['nombre'])}">${element['nombre']}</span></div>
+          <div class="col-1" ><span>$${separator(element['costo'])}</span></div>
+          <div class="col-1" ><span>$${separator(element['mayoritario'])}</span></div>
+          <div class="col-1" ><span>${element['cantidad']}</span></div>
+          <div class="col-1 d-none d-md-block" onclick="verSinPuntos(this)" ><span class="${acortarTexto((element['nombreP'])?element['nombreP']:"Sin proveedor")}">${(element['nombreP'])?element['nombreP']:"Sin proveedor"}</span></div>
+          <div class="col-1 d-none d-md-block" onclick="verSinPuntos(this)" ><span class="${acortarTexto((element['nombreLaboratorio'])?element['nombreLaboratorio']:"Sin laboratorio")}">${(element['nombreLaboratorio'])?element['nombreLaboratorio']:"Sin laboratorio"}</span></div>
+          <div class="col-1"  style="display:none;"><span>${element['codBarra']}</span></div>
+          <div class="col-1  d-none d-md-block" onclick="verSinPuntos(this)" ><span class="${acortarTexto((element['fechaVence'])?element['fechaVence']:"Sin vencimiento")}">${(element['fechaVence'])?element['fechaVence']:"Sin vencimiento"}</span></div>
+          <div class="col-12"  style="display: flex;gap: 5px;">
+          <span class="lapiz" onclick="abrirModalEdit(${element['articulo']})"><i style="color:#1976d2;" class="fas fa-pencil-alt"></i></span>
+          <span class="vasurero" onclick="deleteProduct(${element['articulo']},this)"><i style="color:#d21919;" class="fas fa-trash-alt"></i></span>
+          <span class="qr" onclick="abrirModalImprimirQr(${element['articulo']})">
+            <i class="fas fa-qrcode"></i>
+          </span>
+          </div>
+      </div>`
+  
    
   });
+
+  if(articulosStock.length==0){
+    tablaArticulos=`
+    <div class="row text-center mb-1" style="font-weight: bold;font-size: 150%;background:grey;display: flex;border-radius: 5px;box-shadow: 1px 1px 1px 1px gray;justify-content: space-around;color: #ffffff;padding: 1%;">
+      Sin articulos
+    </div>
+    `
+  }
+
+
   document.getElementById("articulosTabla").innerHTML=tablaArticulos
  }
 
@@ -622,9 +601,6 @@ $(document).ready(async function(){
 
   
 
-  document.getElementById("establecimientos").addEventListener("change",()=>{
-    traerPoductoGalpon(document.getElementById("establecimientos").value)
-  })
  }
  async function dibujarCategorias(categorias) {
   let dibujarCategorias=`<option value="" disabled selected>Categorias</option>`
@@ -638,19 +614,19 @@ $(document).ready(async function(){
   document.getElementById("categoriaNew").innerHTML=dibujarCategorias
  }
 
- async function traerPoductoGalpon(id) {
+ /* async function traerPoductoGalpon(id) {
      cargando()
   let esta=JSON.parse(localStorage.getItem("user")).establecimiento
   await fetch('php/listarArticulos.php?id='+id+'&establecimiento='+esta)
   .then(response => response.json())
   .then(async (data)=>{
     console.log(data)
-    await dibujarTabla(data[1])
+    await dibujarTabla(data)
 
-    return todosLosArticulosCategorias=data
+    return allArticulosLimitado=data
   });
    
- }
+ } */
 
  /* //////////////////////////////////////////////////////////////////////////////////// */
  /* //////////////////////////////////////////////////////////////////////////////////// */
@@ -694,20 +670,11 @@ $(document).ready(async function(){
  /* //////////////////////////////////////////////////////////////////////////////////// */
  document.getElementById("form").addEventListener("submit",async(e)=>{
       e.preventDefault()
-      let form=new FormData(document.getElementById("form"))
-      await fetch('php/comprobarcode.php',{
-        body:form,
-        method:"POST",
-      })
-  .then((response) => response.json())
-  .then(async (data) => {
-    console.log(data)
-    
-
-    if (data=="") {
-        cargando()
-      
+      cargando()
+      let input22 = document.querySelector('#file');
+      let image = input22.files[0];
       let formData = new FormData(document.getElementById("form"));
+      formData.append('image', image);
       await fetch("php/addNewProduct.php", {
           method: 'POST',
           body: formData,
@@ -716,41 +683,26 @@ $(document).ready(async function(){
             console.log(decodificado)
               if (decodificado=="perfecto") {
                 $("#addnew").modal("hide")
-                document.getElementById("codeDiplicado").innerHTML=""
+               
                 vaciarFormularioNew()
                 listarArticulos().then(async()=>{
-                  await dibujarTabla(todosLosArticulosCategorias[1])
+                  await dibujarTabla(allArticulosLimitado)
                 })
               }
           });
-    }else{
-      document.getElementById("codeDiplicado").innerHTML+=`<h4>Productos con el mismo codigo de barra</h4><hr>`
-     data.forEach(element => {
-      document.getElementById("codeDiplicado").innerHTML+=`<h6>${element.nombre}</h6>`
-     });
-      
-    }
-  
-  
-  
-  
-  
-  
-  
-  
-  });
     
   
  })
 
- function guardarEditArticulo(id) {
-     cargando()
+ async function guardarEditArticulo(id) {
+  $("#articulo"+id).modal("hide")
+  toastr.warning("Actualizando el articulo.")
+    cargando()
    console.log(id)
    let articuloEditado = {
     articulo:id,
     nombreEdit:document.getElementById("nombreEdit"+id).value,
     costoEdit:document.getElementById("costoArticuloEdit"+id).value.replace(/,/g, ""),
-    precioEdit:document.getElementById("precioArticuloEdit"+id).value.replace(/,/g, ""),
     stockMinEdit:document.getElementById("stockminEdit"+id).value,
     cantidadEdit:document.getElementById("cantidadEdit"+id).value,
     descripcionEdit:document.getElementById("descripcionEdit"+id).value,
@@ -764,32 +716,30 @@ $(document).ready(async function(){
   let datosEnviar = new FormData();
   datosEnviar.append("articulo", JSON.stringify(articuloEditado));
 
-  fetch("php/editarArticulo.php?id=", {
+  await fetch("php/editarArticulo.php?id=", {
     method: 'POST',
     body: datosEnviar,
     }).then(respuesta => respuesta.json())
-        .then(decodificado => {
+        .then( async decodificado => {
           console.log(decodificado)
             if (decodificado=="perfecto") {
-              $("#articulo"+id).modal("hide")
-              listarArticulos().then(async()=>{
-                await traerPoductoGalpon(document.getElementById("establecimientos").value)
-              })
+              
+              editAddListarOK(id,articuloEditado)
+
             }
         });
 
   console.log(articuloEditado)
  }
 
- function subirPorcentajeEnPrecios() {
+ async function subirPorcentajeEnPrecios() {
    let porcentaje=document.getElementById("porcentaje").value
    if(porcentaje){
-    fetch("php/aumentarPrecio.php?porcentaje="+porcentaje)
-          .then(respuesta => {
+    await fetch("php/aumentarPrecio.php?porcentaje="+porcentaje)
+          .then(async respuesta => {
                 $("#modalPorcentaje").modal("hide")
-                listarArticulos().then(async()=>{
-                  await traerPoductoGalpon(document.getElementById("establecimientos").value)
-                })
+                await listarArticulos()
+                dibujarTabla(allArticulosLimitado)
             }
           );
     }else{
@@ -843,12 +793,11 @@ $(document).ready(async function(){
   let laboratorio=document.getElementById("selectLaboratorioAumentar").value
   if(laboratorio&&porcentaje){
     await fetch("php/aumentarPrecioLaboratorio.php?porcentaje="+porcentaje+"&idLab="+laboratorio)
-          .then(respuesta => {
+          .then(async respuesta => {
                 console.log(respuesta)
                 $("#modalPorcentajeLaboratorio").modal("hide")
-                listarArticulos().then(async()=>{
-                  await traerPoductoGalpon(document.getElementById("establecimientos").value)
-                })
+                await listarArticulos()
+                dibujarTabla(allArticulosLimitado)
              }
           );
   }else{
@@ -870,8 +819,8 @@ async function deleteProduct(id,e) {
     .then(async(data)=>{ 
       if(data=="exito"){
         console.log(data)
-        await listarArticulos()
-        document.getElementById("totalProductos").innerHTML=todosLosArticulosCategorias[1].length
+        eliminarLocalhost(id)
+        document.getElementById("totalProductos").innerHTML=allArticulosLimitado.length
           e.parentElement.parentElement.remove()
         }
       })
@@ -917,7 +866,7 @@ function addNewProductFrom(id) {
     
     /* console.log((parseInt(id))) */
    
-        let pro=todosLosArticulosCategorias[1]
+        let pro=allArticulosLimitado
     
         pro= pro.find((m) => parseInt(m.articulo) === parseInt(id));
         console.log("Es: " + pro);
@@ -928,7 +877,7 @@ function addNewProductFrom(id) {
         
         
         let proveedor=`<option value="">SIN PROVEDOR</option>`
-      todosLosArticulosCategorias[3].forEach(element => {
+      proveedores.forEach(element => {
         proveedor+=`
         <option ${(element.idProveedor==pro.idProveedor)?"selected":""} value="${element.idProveedor}">${element.nombreP}</option>
         `
@@ -1053,59 +1002,10 @@ function addNewProductFrom(id) {
                 divGanancia.appendChild(labelGanancia)
                 td.appendChild(divGanancia)
                 sumaLocalIniciandoEnPorcentaje(input)
-               /*  let div=`
               
-                <label style="max-width: max-content;" for="meno${data.articulo}" class="active">Ganancia</label>
-                <span style="z-index: 9999;position: absolute;top: -200%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
-                
-                `
-                td.innerHTML+=div */
-                /* el primer input es el de porcentaje */
-                /* diva.insertBefore(input,input2); */
             }else if(index==5){
-               /*  let input2 = document.createElement("input");
-                input2.type = "number";
-                input2.step="0.01"
-                input2.name = "preciomayor[]";
-                input2.onkeyup = sumarTodoTodito;
-                input2.style.display = "none";
-                
-                
-                
-                let input3 = document.createElement("input");
-                input3.className="form-control"
-                input3.required=true
-                input3.name="mayo[]"
-                input3.type = "number";
-                input3.step="0.01"
-                input3.style.width="44%"
-                input3.style.display="inline"
-                input3.style.marginRight="2%"
-                input3.value=data.mayorCentaje
-                input3.onkeyup = sumarTodoTodito;
-                td=document.createElement('td')
-                
-                tr.appendChild(td)
-
-                let p = document.createElement("p");
-                p.innerText = "$0";
-                p.style.color = "rgb(0 206 84 / 97%)";
-                p.style.fontSize = "130%";
-                p.style.background = "#ffc4f2";
-                p.style.borderRadius = "5px";
-                p.style.padding = "1%";
-                p.style.display = "inline";
-                td.appendChild(p)
-                let div=`
-                <div class="md-form">
-                <input type="number" step="0.01" disabled class="form-control" id="mayo${data.articulo}">
-                <label style="max-width: max-content;" for="mayo${data.articulo}" class="active">Ganancia por mayor</label>
-                <span style="position: absolute;top: -190%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
-                </div>
-                `
-                td.innerHTML+=div
-                td.insertBefore(input3,td.firstChild);
-                td.appendChild(input2) */
+             
+           
             }else if(index==6){
               let boton=document.createElement('a')
               boton.className="btn btn-sm btn-primary borrar"
@@ -1210,3 +1110,87 @@ function calcularDias(f) {
   // Cambiar el estilo del campo según la cantidad de días restantes (similar al ejemplo anterior)
 }
 
+async function dibujarSelectFiltro(articulos) {
+  let option=`<option value="" selected disabled >Seleccione un articulo</option>`
+  articulos.forEach(element => {
+    option+=`<option value="${element.articulo}">${element.nombre}</option>`
+  });
+  document.getElementById("selectSeachJs").innerHTML=option
+}
+
+async function eliminarLocalhost(id) {
+  
+/*  console.log(e) */
+ 
+  // Encuentra el índice del artículo en el array
+  const res = allArticulosLimitado.filter((m) => m.articulo != id);
+  allArticulosLimitado=res
+  toastr.success("Se elimino un articulo.")
+  
+   
+  }
+async function editAddListarOK(id,artiEdit) {
+  // Encuentra el índice del artículo en el array
+  let pro= proveedores.find((m) => parseInt(m.idProveedor) === parseInt(artiEdit.proveedor));
+  let cat= categorias.find((m) => parseInt(m.idCategoria) === parseInt(artiEdit.categoriaEdit));
+  let lal= allLaboratorios.find((m) => parseInt(m.idLaboratorio) === parseInt(artiEdit.labor));
+
+  const res = allArticulosLimitado.findIndex((m) => m.articulo == id);
+  allArticulosLimitado[res]={
+    articulo: id,
+    cantidad: artiEdit.cantidadEdit,
+    categoria: (cat)?cat.idCategoria:"",
+    codBarra: artiEdit.codBarraEdit,
+    costo: artiEdit.costoEdit,
+    descripcion: "",
+    fechaVence: null,
+    idProveedor: (pro)?pro.idProveedor:"",
+    keyTwoLabor: (lal)?pro.idLaboratorio:"",
+    mayoritario: artiEdit.precioMayo,
+    menorCentaje: "26.76",
+    nombre: artiEdit.nombreEdit,
+    nombreCategoria: (cat)?cat.nombreCategoria:"",
+    nombreLaboratorio: (lal)?lal.nombreLaboratorio:"",
+    nombreP: (pro)?pro.nombreP:""
+  }
+  
+  toastr.success("Articulo actualizado.")
+    dibujarTabla(allArticulosLimitado)
+  console.log(allArticulosLimitado);
+  }
+  
+  function acortarTexto(texto) {
+    if (texto.length > 6) {
+        return "texto-acortado";
+    } else {
+        return "";
+    }
+}
+  function acortarTextoMasLargo(texto) {
+    if (texto.length > 10) {
+        return "texto-acortado2";
+    } else {
+        return "";
+    }
+}
+
+function verSinPuntos(elemento) {
+  console.log(elemento.children[0])
+  elemento.children[0].classList.remove("texto-acortado")
+  setTimeout(() => {
+    elemento.children[0].classList.add("texto-acortado")
+  }, 3000);
+}
+function abrirModalImprimirQr(id) {
+  $('#modalQR').modal("show")
+  let qr = new QRious({
+    element: document.getElementById('codigoQR'),
+    value: 'https://xn--cristiannuez-jhb.com/sistema/vista.php?id='+id, // El enlace que quieres codificar
+    size: 400 // El tama帽o en pixeles del c贸digo QR
+  });
+}
+function imprimir(){
+  let canvas = document.querySelector('#codigoQR');
+let win = window.open('', 'Print', 'height=400,width=600');
+win.document.write('<img src="' + canvas.src + '" onload="window.print();window.close()" style="display: block; margin: auto;" />');win.document.close();
+}

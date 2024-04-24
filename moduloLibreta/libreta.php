@@ -16,6 +16,32 @@ require "../conn/conn.php";
     <title>Inicio</title>
 </head>
 <body>
+  <style>
+    .pagado{
+      display: flex;
+      background: #defdca;
+      padding: 1%;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #34af16;
+      text-align: center;
+      justify-content: space-between;
+      margin: 1%;
+      box-shadow: 1px 1px 1px 1px #41b523;
+    }
+    .pendiente{
+      display: flex;
+      background: #fdcaca;
+      padding: 1%;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #af1616;
+      text-align: center;
+      justify-content: space-between;
+      margin: 1%;
+      box-shadow: 1px 1px 1px 1px #b52323;
+    }
+  </style>
     <section>
         <?php require "../navBar/navCarpeta.php";?>
     </section>
@@ -70,7 +96,7 @@ li:hover{
     background: white;
     z-index: 1;
     box-shadow: 0 11px 20px black;
-    position: initial;
+    position: initial; 
     list-style-type: none; 
     padding: 3%;
     max-height: 300px !important;
@@ -180,6 +206,7 @@ input[type="text"]{
             <div class="col-12">
                 <div class="md-form">
                     <input style="display:none;" type="number" id="idFamiliaLibreta" name="idFamilia" class="form-control text-center">
+                    <input style="display:none;" type="number" id="idLibretaTabla" name="idLibretaTabla" class="form-control text-center">
                     <input type="number" step="any" id="pagoCon" name="pagoCon" class="form-control text-center">
                     <label for="pagoCon">Monto</label>
                 </div>

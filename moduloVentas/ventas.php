@@ -574,6 +574,7 @@ tr th:last-child {
       <div style="display: flex;justify-content: space-around;">
         <button type="button" class="btn btn-blue btn-sm">Total Ventas <span id="totalVEntasModalCaja"></span></button>
         <button type="button" class="btn btn-danger btn-sm" id="subirOfflinesAll">offLine <span id="totalVEntasModalCajaOffLine"></span></button>
+        <a id="exportar" class="btn btn-secondary btn-sm">Exp. excel</a> 
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Minimizar</button>
       </div>
     </div>

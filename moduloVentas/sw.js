@@ -20,8 +20,9 @@ self.addEventListener('install', function(event) {
           'script.js',
           'php/listarProductos.php?idEsta=1',
           'php/cargarArticulo.php',
-          'php/listarIntegrantes.php',
+          'php/listarClientes.php',
           'php/ultimoTicket.php',
+          '../moduloTicket/imp11.php',
           'js/ventas.js'
           // Agrega aquí los archivos que deseas almacenar en caché
         ]);

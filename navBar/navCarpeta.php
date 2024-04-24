@@ -10,7 +10,7 @@
                 <span class="sr-only">(current)</span>
                 </a>
             </li>
-            <li class="nav-item dropdown <?php echo (isset($_GET['stock']))?$_GET['stock']:""?>">
+            <li id="stockOcultar" class="nav-item dropdown <?php echo (isset($_GET['stock']))?$_GET['stock']:""?>">
                   <a class="nav-link dropdown-toggle waves-effect waves-light" id="navbarDropdownMenuLink-5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Productos
                   </a>
                   <div class="dropdown-menu dropdown-default" aria-labelledby="navbarDropdownMenuLink-5">
@@ -19,7 +19,7 @@
                   <!-- <a class="dropdown-item waves-effect waves-light" href="#">Something else here</a> -->
                   </div>
               </li>
-            <li class="nav-item <?php echo (isset($_GET['compras']))?$_GET['compras']:""?>">
+            <li id="comprasOcultar" class="nav-item <?php echo (isset($_GET['compras']))?$_GET['compras']:""?>">
                 <a class="nav-link waves-effect waves-light" href="../moduloCompras/compras.php?compras=active">Compras</a>
             </li>
             <li class="nav-item <?php echo (isset($_GET['v']))?$_GET['v']:""?>">
@@ -28,7 +28,7 @@
             <li class="nav-item <?php echo (isset($_GET['lib']))?$_GET['lib']:""?>">
                 <a class="nav-link waves-effect waves-light" href="../moduloLibreta/libreta.php?lib=active">Libreta</a>
               </li>
-            <li class="nav-item dropdown <?php echo (isset($_GET['admin']))?$_GET['admin']:""?>">
+            <li id="cajaOcultar" class="nav-item dropdown <?php echo (isset($_GET['admin']))?$_GET['admin']:""?>">
                 <a class="nav-link dropdown-toggle waves-effect waves-light" id="navbarDropdownMenuLink-3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin
                 </a>
                 <div class="dropdown-menu dropdown-default" aria-labelledby="navbarDropdownMenuLink-3">

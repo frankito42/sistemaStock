@@ -28,7 +28,7 @@ function addNewProductFrom(id) {
             let td=document.createElement('td')
             
             
-            let nombre=document.createTextNode(data.nombre)
+           
             if(index==0){
                 /* let img=document.createElement('img')
                 img.setAttribute("height", "80");
@@ -37,8 +37,12 @@ function addNewProductFrom(id) {
                 td.appendChild(img)
                 tr.appendChild(td) */
             }else if(index==1){
-                td.appendChild(nombre)
-                tr.appendChild(td)
+              let inputN=document.createElement('input')
+              inputN.className="form-control"
+              inputN.value=data.nombre
+              inputN.name="nombre[]"
+              td.appendChild(inputN)
+              tr.appendChild(td)
             }else if(index==2){
                 /* CANTIDADDDDDDDDDDDDDDDDDDDDDDDDD */
                 let inputCantidad=document.createElement('input')
@@ -189,27 +193,48 @@ function addNewProductFrom(id) {
 
 
 // Material Select Initialization
-$(document).ready(function() {
-     document.getElementById("codActForm").addEventListener("submit",(e)=>{
-    e.preventDefault()
-    
-    let codigo=document.getElementById('codigoBAc').value
+$(document).ready(async function() {
+    await traerEntradas()
+    await listarPedidos()
+    await listarProveedores()
+    await traerArticulos()
+    $('.mdb-select').materialSelect();
 
-     fetch('traerArticuloCodigo.php?cod='+codigo)
-    .then(response => response.json())
-    .then((data)=>{ 
-      console.log(data)
-        if(data==false){
-            alert("El producto no extiste.")
-            document.getElementById("codActForm").reset()
-            document.getElementById('codigoBAc').focus()
-        }else{
-            
-            let tablaEscondida=document.getElementById("tablaEscondida").style.display="block"
-        let tbody=document.getElementById("addProducto")
-        let primerHijo=tbody.firstChild
-        
-        
+
+
+    document.getElementById("pedidos").addEventListener("change",async (e)=>{
+      let pedidoId=document.getElementById("pedidos").value
+      let response = await fetch("traerPedido.php?id="+pedidoId);
+      let pedidos = await response.json();
+      console.log(pedidos);
+      document.getElementById("addProducto").innerHTML=""
+      pedidos.forEach(element => {
+        addPedidoTabla(element)
+      });
+    })
+
+
+
+     document.getElementById("codActForm").addEventListener("submit",async(e)=>{
+      e.preventDefault()
+      
+      let codigo=document.getElementById('codigoBAc').value
+
+      await fetch('traerArticuloCodigo.php?cod='+codigo)
+      .then(response => response.json())
+      .then((data)=>{ 
+        console.log(data)
+          if(data==false){
+              alert("El producto no extiste.")
+              document.getElementById("codActForm").reset()
+              document.getElementById('codigoBAc').focus()
+          }else{
+              
+              let tablaEscondida=document.getElementById("tablaEscondida").style.display="block"
+          let tbody=document.getElementById("addProducto")
+          let primerHijo=tbody.firstChild
+          
+          
  
 
 
@@ -226,7 +251,6 @@ $(document).ready(function() {
             let td=document.createElement('td')
             
             
-            let nombre=document.createTextNode(data.nombre)
             if(index==0){
                 /* let img=document.createElement('img')
                 img.setAttribute("height", "80");
@@ -235,8 +259,12 @@ $(document).ready(function() {
                 td.appendChild(img)
                 tr.appendChild(td) */
             }else if(index==1){
-                td.appendChild(nombre)
-                tr.appendChild(td)
+              let inputN=document.createElement('input')
+              inputN.className="form-control"
+              inputN.value=data.nombre
+              inputN.name="nombre[]"
+              td.appendChild(inputN)
+              tr.appendChild(td)
             }else if(index==2){
                 /* CANTIDADDDDDDDDDDDDDDDDDDDDDDDDD */
                 let inputCantidad=document.createElement('input')
@@ -393,7 +421,7 @@ $(document).ready(function() {
     
     
 })
-  $('.mdb-select').materialSelect();
+
   console.log($(this))
   /* SOY EL MEJOR LPM */
   document.getElementsByClassName("dropdown-content select-dropdown").forEach((element)=>{
@@ -448,10 +476,10 @@ console.log(id)
     
 }
 
-function borrar(id) {
+async function borrar(id) {
   $("#modal"+id).modal('hide')
    
-  fetch('borrarEntradaCompleta.php?idEntrada='+id)
+  await fetch('borrarEntradaCompleta.php?idEntrada='+id)
   .then(response => response.json())
   .then((data) => {
     /* console.log(data) */
@@ -507,10 +535,10 @@ $(modal).modal("show")
   
 }
 
-function borrarDetalle(id,cantidad,idArticulo) {
+async function borrarDetalle(id,cantidad,idArticulo) {
   $("#modalDetalle"+id).modal('hide')
    
-  fetch('borrarEntradaProducto.php?id='+id+'&cantidad='+cantidad+'&idArticulo='+idArticulo)
+  await fetch('borrarEntradaProducto.php?id='+id+'&cantidad='+cantidad+'&idArticulo='+idArticulo)
   .then(response => response.json())
   .then((data) => {
     /* console.log(data) */
@@ -641,18 +669,19 @@ function ponerPorcentajeMayorReversa(e){
   ganancia.value=(isNaN((precioMayor-costo).toFixed(2)))?0:(precioMayor-costo).toFixed(2)
 }
 
-document.getElementById("pagarFactura").addEventListener("submit",(e)=>{
+document.getElementById("pagarFactura").addEventListener("submit",async (e)=>{
   e.preventDefault()
   let formdata=new FormData(document.getElementById("pagarFactura"))
   formdata.append("eg",localStorage.getItem("totalFacturaP"))
-  fetch('pagarFactura.php',{
+  await fetch('pagarFactura.php',{
     method:"post",
     body:formdata
   })
   .then(response => response.json())
-  .then((data) => {
+  .then(async (data) => {
     console.log(data)
-    location.reload()
+    await traerEntradas()
+    $("#centralModalSuccess").modal("hide")
   });
 })
 function abrirModalPagarFactura(idFactura,total) {
@@ -661,4 +690,430 @@ function abrirModalPagarFactura(idFactura,total) {
   localStorage.setItem("totalFacturaP",total)
   document.getElementById("TOTALaPagar").innerHTML="Tota a pagar: $"+total
   $("#centralModalSuccess").modal("show")
+}
+
+
+async function traerArticulos() {
+  await fetch('listarArticulos.php')
+  .then(response => response.json())
+  .then(async(data) => {
+    console.log(data)
+    await dibujarSelectFiltro(data)
+  });
+}
+async function traerEntradas() {
+  await fetch('listarCompras.php')
+  .then(response => response.json())
+  .then(async(data) => {
+    console.log(data)
+    await dibujarTrEntradas(data)
+  });
+}
+async function dibujarSelectFiltro(articulos) {
+  let option=`<option value="" selected disabled >Seleccione un articulo</option>`
+  articulos.forEach(element => {
+    option+=`<option value="${element.articulo}">${element.nombre}</option>`
+  });
+  document.getElementById("selectSeachJs").innerHTML=option
+}
+
+async function listarProveedores() {
+  await fetch('listarProveedores.php')
+  .then(response => response.json())
+  .then(async (data)=>{
+    console.log(data)
+    let option=`<option value="" selected disabled>Seleccionar proveedor</option>`
+    data.forEach(element => {
+      option+=`<option value="${element.idProveedor}">${element.nombreP}</option>`
+    });
+    document.getElementById("selectProvedor").innerHTML=option
+  });
+    
+}
+async function listarPedidos() {
+  await fetch('listarPedidos.php')
+  .then(response => response.json())
+  .then(async (data)=>{
+    console.log(data)
+    let option=`<option value="" selected disabled>Seleccionar pedido</option>`
+    data.forEach(element => {
+      option+=`<option value="${element.idPedido}">${element.nombreP} fecha ${element.fechaHora}</option>`
+    });
+    document.getElementById("pedidos").innerHTML=option
+  });
+    
+}
+
+async function dibujarTrEntradas(entradas) {
+  let rows = '';
+  entradas.forEach(key => {
+    let background = key.estado == 0 ? '#ffb3b3' : '';
+    rows += `
+      <tr style="background:${background};" id="entrada${key.idEntrada}">
+        <td>Fecha ${key.fecha} <br> NRO: ${key.nFactura}</td>
+        <td>${key.observacion}</td>
+        <td>${key.totalCosto}</td>
+        <td><span style="padding:5%;border-radius:5px;background:#2bbbad;color:white;">${key.metodoPago}</span></td>
+        <td>${key.nombreP}</td>
+        <td>
+          <a href="detalleCompra.php?idEntrada=${key.idEntrada}" class="btn btn-blue btn-sm">VER</a> 
+          <a onclick="abrirModalBorrar(${key.idEntrada},'${key.fecha}','${key.nFactura}','${key.observacion}')" class="btn btn-danger btn-sm">x</a>
+          ${key.estado == 0 ? `<a class="btn btn-success btn-sm" onclick="abrirModalPagarFactura(${key.idEntrada},${key.totalCosto})"><i class="fa-brands fa-google-pay fa-3x"></i></a>` : ''}
+        </td>
+      </tr>`;
+  });
+  document.getElementById("tablaEntradas").innerHTML = rows;
+}
+function newProducto() {
+    
+  /* console.log((parseInt(id))) */
+
+      let tablaEscondida=document.getElementById("tablaEscondida").style.display="block"
+      let tbody=document.getElementById("addProducto")
+      let primerHijo=tbody.firstChild
+      
+      
+
+
+
+
+
+
+
+
+
+
+      let tr=document.createElement('tr')
+      
+      for (let index = 0; index <= 6; index++) {
+          let td=document.createElement('td')
+          
+          
+          
+          if(index==0){
+              /* let img=document.createElement('img')
+              img.setAttribute("height", "80");
+              img.setAttribute("width", "80")
+              img.setAttribute("src", data.imagen.replace('../', ''))
+              td.appendChild(img)
+              tr.appendChild(td) */
+          }else if(index==1){
+              let inputN=document.createElement('input')
+              inputN.className="form-control"
+              inputN.value=""
+              inputN.name="nombre[]"
+              td.appendChild(inputN)
+              tr.appendChild(td)
+          }else if(index==2){
+              /* CANTIDADDDDDDDDDDDDDDDDDDDDDDDDD */
+              let inputCantidad=document.createElement('input')
+              inputCantidad.className="form-control"
+              inputCantidad.required=true
+              inputCantidad.type="number"
+              inputCantidad.step="0.01"
+              inputCantidad.name="cantidad[]"
+              td=document.createElement('td')
+              td.appendChild(inputCantidad)
+              tr.appendChild(td)
+          }else if(index==3){
+              /* COSTOOOOOOOOOOOOOOOOOOOOOO */
+              let inputCosto=document.createElement('input')
+              let inputFantasma=document.createElement('input')
+              inputCosto.className="form-control"
+              inputCosto.required=true
+              inputCosto.type="number"
+              inputCosto.step="0.01"
+              inputCosto.name="costo[]"
+              inputCosto.addEventListener("keyup",(e)=>{
+                sumaLocalIniciandoEnCosto(e.target)
+              })
+              inputCosto.value=0
+              inputFantasma.value=0
+              inputFantasma.name="idArticulo[]"
+              inputFantasma.style.display="none"
+             
+            
+         
+
+              tr.style.position="relative"
+              td=document.createElement('td')
+              td.appendChild(inputFantasma)
+              td.appendChild(inputCosto)
+              tr.appendChild(td)
+              
+          }else if(index==4){
+            let diva=document.createElement("div")
+            diva.className="input-group"
+            let input2=document.createElement('input')
+            input2.type = "text";
+            input2.step="0.01"
+            input2.style="text-align: center;"
+            input2.name = "precioventa[]";
+            input2.className = "form-control";
+            input2.addEventListener("keyup",(e)=>{
+              ponerPorcentajeMayorReversa(e.target)
+            })
+            
+            let input=document.createElement('input')
+              input.className="form-control"
+              input.required=true
+              input.name="meno[]"
+              input.style.width="20%"
+              input.type="number"
+              input.step="0.01"
+              input.style="text-align: center;"
+              input.value=0
+              input.addEventListener("keyup",(e)=>{
+                sumaLocalIniciandoEnPorcentaje(e.target)
+              })
+              
+
+
+              td=document.createElement('td')
+              tr.appendChild(td)
+              diva.appendChild(input)
+              let p=document.createElement("h3")
+              p.innerHTML="$"
+              diva.appendChild(p)
+              diva.appendChild(input2)
+              td.appendChild(diva)
+              let divGanancia=document.createElement("div")
+              divGanancia.className="md-form"
+              let inputGanancia=document.createElement("input")
+              inputGanancia.className="form-control"
+              inputGanancia.disabled=true
+              inputGanancia.step="0.01" 
+              inputGanancia.id="meno"+0
+              let labelGanancia=document.createElement("label")
+              labelGanancia.className="active"
+              labelGanancia.innerHTML="Ganancia"
+
+              divGanancia.appendChild(inputGanancia)
+              divGanancia.appendChild(labelGanancia)
+              td.appendChild(divGanancia)
+              sumaLocalIniciandoEnPorcentaje(input)
+             /*  let div=`
+            
+              <label style="max-width: max-content;" for="meno${data.articulo}" class="active">Ganancia</label>
+              <span style="z-index: 9999;position: absolute;top: -200%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
+              
+              `
+              td.innerHTML+=div */
+              /* el primer input es el de porcentaje */
+              /* diva.insertBefore(input,input2); */
+          }else if(index==5){
+              let vence = document.createElement("input");
+              vence.type = "date";
+              vence.name = "vence[]";
+         
+              td=document.createElement('td')
+              tr.appendChild(td)
+              td.appendChild(vence) 
+          }else if(index==6){
+            let boton=document.createElement('a')
+            boton.className="btn btn-sm btn-primary borrar"
+            boton.innerText="x"
+            td.appendChild(boton)
+            tr.appendChild(td)
+        }
+
+      }
+
+      tbody.insertBefore(tr, primerHijo);
+      
+      let borrar=document.getElementsByClassName("borrar")
+
+  
+/* CAMBIAR ESTO POR UNA FUNCION CON THIS PARA ELIMINAR  */
+      borrar.forEach(element => {
+       
+        element.addEventListener("click",(e)=>{
+              console.log(e.target.parentNode.parentNode.parentNode)
+              console.log(e.target.parentNode.parentNode)
+              e.target.parentNode.parentNode.parentNode.removeChild(e.target.parentNode.parentNode)
+              if (tbody.childElementCount==0) {
+                  document.getElementById("tablaEscondida").style.display="none"
+              }
+          })
+  });
+
+
+}
+function addPedidoTabla(pedidoArticulo) {
+    
+  /* console.log((parseInt(id))) */
+
+      let tablaEscondida=document.getElementById("tablaEscondida").style.display="block"
+      let tbody=document.getElementById("addProducto")
+      let primerHijo=tbody.firstChild
+      
+      
+
+
+
+
+
+
+
+
+
+
+      let tr=document.createElement('tr')
+      
+      for (let index = 0; index <= 6; index++) {
+          let td=document.createElement('td')
+          
+          
+          
+          if(index==0){
+              /* let img=document.createElement('img')
+              img.setAttribute("height", "80");
+              img.setAttribute("width", "80")
+              img.setAttribute("src", data.imagen.replace('../', ''))
+              td.appendChild(img)
+              tr.appendChild(td) */
+          }else if(index==1){
+              let inputN=document.createElement('input')
+              inputN.className="form-control"
+              inputN.value=pedidoArticulo.nombre
+              inputN.name="nombre[]"
+              td.appendChild(inputN)
+              tr.appendChild(td)
+          }else if(index==2){
+              /* CANTIDADDDDDDDDDDDDDDDDDDDDDDDDD */
+              let inputCantidad=document.createElement('input')
+              inputCantidad.className="form-control"
+              inputCantidad.required=true
+              inputCantidad.type="number"
+              inputCantidad.step="0.01"
+              inputCantidad.name="cantidad[]"
+              inputCantidad.value=pedidoArticulo.cantidad
+              td=document.createElement('td')
+              td.appendChild(inputCantidad)
+              tr.appendChild(td)
+          }else if(index==3){
+              /* COSTOOOOOOOOOOOOOOOOOOOOOO */
+              let inputCosto=document.createElement('input')
+              let inputFantasma=document.createElement('input')
+              inputCosto.className="form-control"
+              inputCosto.required=true
+              inputCosto.type="number"
+              inputCosto.step="0.01"
+              inputCosto.name="costo[]"
+              inputCosto.value=pedidoArticulo.costo
+              inputCosto.addEventListener("keyup",(e)=>{
+                sumaLocalIniciandoEnCosto(e.target)
+              })
+              
+              inputFantasma.value=pedidoArticulo.idArticulo
+              inputFantasma.name="idArticulo[]"
+              inputFantasma.style.display="none"
+             
+            
+         
+
+              tr.style.position="relative"
+              td=document.createElement('td')
+              td.appendChild(inputFantasma)
+              td.appendChild(inputCosto)
+              tr.appendChild(td)
+              
+          }else if(index==4){
+            let diva=document.createElement("div")
+            diva.className="input-group"
+            let input2=document.createElement('input')
+            input2.type = "text";
+            input2.step="0.01"
+            input2.style="text-align: center;"
+            input2.name = "precioventa[]";
+            input2.value=pedidoArticulo.mayoritario
+            input2.className = "form-control";
+            input2.addEventListener("keyup",(e)=>{
+              ponerPorcentajeMayorReversa(e.target)
+            })
+            
+            let input=document.createElement('input')
+              input.className="form-control"
+              input.required=true
+              input.name="meno[]"
+              input.style.width="20%"
+              input.type="number"
+              input.step="0.01"
+              input.style="text-align: center;"
+              input.value=pedidoArticulo.menorCentaje
+              input.addEventListener("keyup",(e)=>{
+                sumaLocalIniciandoEnPorcentaje(e.target)
+              })
+              
+
+
+              td=document.createElement('td')
+              tr.appendChild(td)
+              diva.appendChild(input)
+              let p=document.createElement("h3")
+              p.innerHTML="$"
+              diva.appendChild(p)
+              diva.appendChild(input2)
+              td.appendChild(diva)
+              let divGanancia=document.createElement("div")
+              divGanancia.className="md-form"
+              let inputGanancia=document.createElement("input")
+              inputGanancia.className="form-control"
+              inputGanancia.disabled=true
+              inputGanancia.step="0.01" 
+              inputGanancia.id="meno"+0
+              let labelGanancia=document.createElement("label")
+              labelGanancia.className="active"
+              labelGanancia.innerHTML="Ganancia"
+
+              divGanancia.appendChild(inputGanancia)
+              divGanancia.appendChild(labelGanancia)
+              td.appendChild(divGanancia)
+              sumaLocalIniciandoEnPorcentaje(input)
+             /*  let div=`
+            
+              <label style="max-width: max-content;" for="meno${data.articulo}" class="active">Ganancia</label>
+              <span style="z-index: 9999;position: absolute;top: -200%;background: #5cd1ff99;padding: 2%;border-radius: 5px;color: #ff023d;">%</span>
+              
+              `
+              td.innerHTML+=div */
+              /* el primer input es el de porcentaje */
+              /* diva.insertBefore(input,input2); */
+          }else if(index==5){
+              let vence = document.createElement("input");
+              vence.type = "date";
+              vence.name = "vence[]";
+         
+              td=document.createElement('td')
+              tr.appendChild(td)
+              td.appendChild(vence) 
+          }else if(index==6){
+            let boton=document.createElement('a')
+            boton.className="btn btn-sm btn-primary borrar"
+            boton.innerText="x"
+            td.appendChild(boton)
+            tr.appendChild(td)
+        }
+
+      }
+
+      tbody.insertBefore(tr, primerHijo);
+      
+      let borrar=document.getElementsByClassName("borrar")
+
+  
+/* CAMBIAR ESTO POR UNA FUNCION CON THIS PARA ELIMINAR  */
+      borrar.forEach(element => {
+       
+        element.addEventListener("click",(e)=>{
+              console.log(e.target.parentNode.parentNode.parentNode)
+              console.log(e.target.parentNode.parentNode)
+              e.target.parentNode.parentNode.parentNode.removeChild(e.target.parentNode.parentNode)
+              if (tbody.childElementCount==0) {
+                  document.getElementById("tablaEscondida").style.display="none"
+              }
+          })
+  });
+
+
 }

@@ -53,10 +53,10 @@ async function expandirDivPago() {
 
         if(responseData!="" && responseData!="error"){
             qrIntvalo=setInterval(async () => {
-                const verif = await fetch("https://salvatoreminishop.com/notificaciones/notificaciones.php?verificar=verificar&pago="+responseData);
+                const verif = await fetch("../notificaciones/notificaciones.php?verificar=verificar&pago="+responseData);
                 const verifData = await verif.text();
                 console.log(verifData);
-                if(verifData=="pagado"){
+                if(verifData=="aprobado"){
                     $("#metodoDePago").modal("hide")
                     await guardarVenta("QR")
                     clearInterval(qrIntvalo)
@@ -246,6 +246,8 @@ async function guardarVenta(tipoPago) {
             console.log(descontarStock(venta[0],venta[2]))
             venta=[]
         })
+        
+        localStorage.setItem("pof",JSON.stringify(ventas))
 
         
         console.log(ventas)
@@ -291,6 +293,7 @@ async function guardarVenta(tipoPago) {
                     }
                     /* para saber cual subir y cual no */
                     productosVen.push("subido")
+                    imprimirElemento()
                     
                  
                     deco.push(productosVen)
@@ -298,7 +301,6 @@ async function guardarVenta(tipoPago) {
                     miCaja.push(deco)
                     localStorage.setItem("miCajaUser",JSON.stringify(miCaja))
                     cargarCaja()
-                    
                     /* $("#exito").modal("show") */
                     document.getElementById('codigoDeBarra').focus()
                   }
@@ -334,6 +336,7 @@ async function guardarVenta(tipoPago) {
                     miCaja.push(deco)
                     localStorage.setItem("miCajaUser",JSON.stringify(miCaja))
                     cargarCaja()
+                    imprimirElemento2()
                     document.getElementById('codigoDeBarra').focus()
                     localStorage.setItem("ultimaVentaOffLine",parseInt(localStorage.getItem("ultimaVentaOffLine"))+1)
                 });
@@ -404,7 +407,7 @@ function dibujarTablaArticulos(data) {
 let integrantes
 
 $(document).ready(async function(){
-    
+    adminVerif()
     await maxTicket()
     showLoader();
     cargarCaja()
@@ -485,7 +488,7 @@ document.getElementById("metodoDePago").addEventListener("keyup", async function
     }
 });
 async function traerClientes() {
-    await fetch('php/listarIntegrantes.php')
+    await fetch('php/listarClientes.php')
   .then((response) => response.json())
   .then(async (data) => {
     console.log(data)
@@ -496,7 +499,7 @@ async function traerClientes() {
 async function dibujarIntegrantes(params) {
     option=`<option selected value="" disabled>Selecciona un cliente</option>`
     params.forEach(element => {
-        option+=`<option value="${element.idIntegrante}">${element.nombre}</option>`
+        option+=`<option value="${element.id}">${element.nombreCliente}</option>`
     });
     document.getElementById("listarIntegrantes").innerHTML=option
 }
@@ -532,12 +535,12 @@ async function guardarVentaEnLibreta() {
             venta=[]
         })
        /*  console.log(ventas) */
-       let filtroArray= integrantes.find((m) => parseInt(m.idIntegrante) === parseInt(document.getElementById("listarIntegrantes").value));
-       console.log(filtroArray);
+       let cliente= integrantes.find((m) => parseInt(m.id) === parseInt(document.getElementById("listarIntegrantes").value));
+       console.log(cliente);
 
        let productosVender = new FormData();
        productosVender.append("productos", JSON.stringify(ventas));
-       productosVender.append("familia", filtroArray.idFamilia);
+       productosVender.append("cliente", cliente.id);
       
         await fetch("php/venderEnLibreta.php", {
           method: 'POST',
@@ -581,7 +584,26 @@ $('#libreta').on('shown.bs.modal', function (e) {
         await guardarVentaEnLibreta()
     
 }); */
+function imprimirElemento2(){
+    console.log("impri")
+   /*  var ficha = ticketVenta;
+    var ventimp = window.open(' ', 'popimpr');
+    ventimp.document.write( ficha.innerHTML );
+    ventimp.document.close();
+    ventimp.print( );
+    ventimp.close(); */
+    let div=document.createElement("div") 
+    $(div).load('../moduloTicket/imp11.php',function(){
+        var printContent = div 
+        var WinPrint = window.open('', '', 'width=900,height=650');
+      WinPrint.document.write(printContent.innerHTML);
+            WinPrint.focus();
+          
+      
+      
+    });
 
+  }
 function imprimirElemento(){
    /*  var ficha = ticketVenta;
     var ventimp = window.open(' ', 'popimpr');
@@ -608,6 +630,24 @@ function imprimirElemento(){
   document.getElementById("printFacturaX").addEventListener("click",()=>{
       imprimirElemento()
   })
+  document.getElementById("exportar").addEventListener("click",async()=>{
+    //imprimirElemento()
+    let form=new FormData()
+    console.log(JSON.parse(localStorage.getItem("miCajaUser")))
+    form.append("caja",localStorage.getItem("miCajaUser"))
+    form.append("user",localStorage.getItem("user"))
+    form.append("inicioUser",localStorage.getItem("inicioUser"))
+    let libretaCobrado=(localStorage.getItem("pagoLibreta")===null)?0:localStorage.getItem("pagoLibreta")
+    form.append("pagoLibreta",libretaCobrado)
+    const response = await fetch("php/exportar.php",{
+        method:"POST",
+        body:form,
+    });
+    const movies = await response.json();
+    console.log(movies);
+    location.href="php/ex.php"
+    
+})
   
   
   

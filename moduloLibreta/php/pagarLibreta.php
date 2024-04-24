@@ -6,18 +6,19 @@ $pagoCon=floatval($_POST['pagoCon']);
 $idFamilia=$_POST['idFamilia'];
 
 
-$sqlTraerCreditoDeEntrega="SELECT `credito` FROM `familia` WHERE `id`=$_POST[idFamilia]";
+$sqlTraerCreditoDeEntrega="SELECT `credito` FROM `clientes` WHERE `id`=$_POST[idFamilia]";
 $entregado=$conn->prepare($sqlTraerCreditoDeEntrega);
 $entregado->execute();
 $entregado=$entregado->fetch(PDO::FETCH_ASSOC);
 
 
-$entregadoMasPagoCon=$entregado['credito']+$pagoCon;
+$entregadoMasPagoCon=floatval($entregado['credito'])+$pagoCon;
 
 
-$sqlSumaArticulosLibreta="SELECT SUM(`cantidad`*`precio`) totalLibreta FROM `libreta` WHERE `idFamilia`=:idFamilia and estado='pendiente'";
+$sqlSumaArticulosLibreta="SELECT sum(`cantidad`*(select mayoritario from articulos WHERE articulo=idProducto)) totalLibreta 
+from productoslibreta WHERE idLibreta=:idLibreta;";
 $sumaLibreta=$conn->prepare($sqlSumaArticulosLibreta);
-$sumaLibreta->bindParam(":idFamilia",$idFamilia);
+$sumaLibreta->bindParam(":idLibreta",$_POST['idLibretaTabla']);
 $sumaLibreta->execute();
 $sumaLibreta=$sumaLibreta->fetch(PDO::FETCH_ASSOC);
 
@@ -33,25 +34,25 @@ if ($entregadoMasPagoCon>$sumaLibreta['totalLibreta']) {
     /* agrego a su historial de entrega */
     $addHistorial="INSERT INTO `entregalibreta`(`idLibreta`, `monto`, `fecha`) VALUES(:id,:m,:f)";
     $historial=$conn->prepare($addHistorial);
-    $historial->bindParam(":id",$_POST['idFamilia']);
+    $historial->bindParam(":id",$_POST['idLibretaTabla']);
     $historial->bindParam(":m",$pagoCon);
     $historial->bindParam(":f",$dateTIME);
     $historial->execute();
     
     
     if ($sumaLibreta['totalLibreta']==$entregadoMasPagoCon) {
-        $sqlUpdateCredito="UPDATE `familia` SET `credito`=0 WHERE `id`=$_POST[idFamilia]";
+        $sqlUpdateCredito="UPDATE `clientes` SET `credito`=0 WHERE `id`=$_POST[idFamilia]";
         $editCredito=$conn->prepare($sqlUpdateCredito);
         $editCredito->execute();
 
-        $sqlPagarArticulo="UPDATE `libreta` SET `estado`='pagado' WHERE `idFamilia`=$_POST[idFamilia]";
+        $sqlPagarArticulo="UPDATE `libretas` SET `estado`='pagado', fechaFin=NOW() WHERE `idLibreta`=$_POST[idLibretaTabla]";
         $pagar=$conn->prepare($sqlPagarArticulo);
         $pagar->execute();
 
         echo json_encode("perfecto");
         
     }else{
-        $sqlUpdateCredito="UPDATE `familia` SET `credito`=$entregadoMasPagoCon WHERE `id`=$_POST[idFamilia]";
+        $sqlUpdateCredito="UPDATE `clientes` SET `credito`=$entregadoMasPagoCon WHERE `id`=$_POST[idFamilia]";
         $editCredito=$conn->prepare($sqlUpdateCredito);
         $editCredito->execute();
 

@@ -8,6 +8,7 @@ function iniciarSesion(){
         location.href="Login/index.php"
     }else{
         document.getElementById("userNameID").innerHTML=JSON.parse(localStorage.getItem("user")).user
+        adminVerif()
     }
 }
 function cerrarSession(){
@@ -17,3 +18,14 @@ function cerrarSession(){
 document.getElementById("cerrarSession").addEventListener("click",()=>{
     cerrarSession()
 })
+
+function adminVerif() {
+    let ussser=JSON.parse(localStorage.getItem("user"))
+
+    console.log(ussser)
+    if(ussser.ventas==1){
+        document.getElementById("stockOcultar").style.display="none"
+        document.getElementById("comprasOcultar").style.display="none"
+        document.getElementById("cajaOcultar").style.display="none"
+    }
+}

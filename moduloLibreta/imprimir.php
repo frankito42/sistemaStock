@@ -52,7 +52,7 @@ use Dompdf\Dompdf;
            <h2 style="    text-align: center;
     background: #38b6ff;
     color: white;
-    border-radius: 5px;"><?php echo "LIBRETA ".$_SESSION['imprimir'][0]['nombreFamilia']?></h2>
+    border-radius: 5px;"><?php echo "LIBRETA ".$_SESSION['imprimir'][0]['nombreCliente']?></h2>
          </div>
     <div>
       <hr>
@@ -65,7 +65,6 @@ use Dompdf\Dompdf;
           <thead style="    background: #38b6ff;
     color: white;">
               <tr>
-                  <th>Nombre</th>
                   <th>Articulo</th>
                   <th>Cantidad</th>
                   <th>Fecha Hora</th>
@@ -74,25 +73,25 @@ use Dompdf\Dompdf;
               </tr>
           </thead>
         <tbody>
-          <?php $total=0; foreach ($_SESSION['imprimir'] as $key):$total+=$key['cantidad']*$key['precio'];?>
+          <?php $total=0; foreach ($_SESSION['imprimir'] as $key):$total+=$key['cantidad']*$key['mayoritario'];?>
           <tr>
-            <td style="padding: 2px;"><?php echo $key['nombre']?></td>
-            <td style="padding: 2px;"><?php echo strtoupper($key['nombreArticulo'])?></td>
+       
+            <td style="padding: 2px;"><?php echo strtoupper($key['nombre'])?></td>
             <td style="padding: 2px;"><?php echo intval($key['cantidad'])?></td>
-            <td style="padding: 2px;"><?php echo $key['fecha']?></td>
-            <td style="padding: 2px;"><?php echo "$".number_format($key['cantidad']*$key['precio'])?></td>
+            <td style="padding: 2px;"><?php echo $key['fechaHora']?></td>
+            <td style="padding: 2px;"><?php echo "$".number_format($key['cantidad']*$key['mayoritario'])?></td>
           </tr>
           <?php endforeach?>
           <tr>
-            <td colspan="4" style="padding: 2px;">TOTAL</td>
+            <td colspan="3" style="padding: 2px;">TOTAL</td>
             <td><?php echo "$".number_format($total);?></td>
           </tr>
           <tr>
-            <td colspan="4" style="padding: 2px;">ENTREGO</td>
+            <td colspan="3" style="padding: 2px;">ENTREGO</td>
             <td><?php echo "$".number_format($_SESSION['imprimir'][0]['credito']);?></td>
           </tr>
           <tr>
-            <td colspan="4" style="padding: 2px;">FALTA PAGAR</td>
+            <td colspan="3" style="padding: 2px;">FALTA PAGAR</td>
             <td><?php echo "$".number_format($total-$_SESSION['imprimir'][0]['credito']);?></td>
           </tr>
         </tbody>
@@ -108,6 +107,6 @@ $dompdf->loadHtml(ob_get_clean());
 $dompdf->setPaper('A4', 'portrait'); // (Opcional) Configurar papel y orientaci車n
 $dompdf->render(); // Generar el PDF desde contenido HTML
 $pdf = $dompdf->output();// Obtener el PDF generado
-$date=$_SESSION['imprimir'][0]['nombreFamilia']." ".date("d-m-Y");
+$date=$_SESSION['imprimir'][0]['nombreCliente']." ".date("d-m-Y");
 $dompdf->stream($date,array("Attachment" => false));
 ?>

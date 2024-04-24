@@ -1,7 +1,55 @@
 let todosLosProveedores
+let listaCheckBox
+let allArticulos
+let pedido=[]
 document.addEventListener("DOMContentLoaded",async function() {
     console.log("DOM fully loaded and parsed");
     await listarProveedores()
+    await traerPedidos()
+    await traerArticulos()
+     
+  document.getElementById("searchList").addEventListener('input', function() {
+    const searchTerm = document.getElementById("searchList").value.toLowerCase();
+
+    listaCheckBox.forEach(item => {
+        const itemText = item.textContent.toLowerCase();
+        if (itemText.includes(searchTerm)) {
+            item.style.display = 'flex'; // Mostrar el elemento
+        } else {
+            item.style.display = 'none'; // Ocultar el elemento
+        }
+    });
+});
+
+
+document.getElementById("formPedido").addEventListener("submit",async (e)=>{
+  e.preventDefault()
+  toastr.warning('Creando un pedido. Espere un momento.')
+  let form=new FormData(document.getElementById("formPedido"))
+  let response = await fetch("php/addPedido.php",{
+    method:"POST",
+    body:form
+  });
+  let res = await response.json();
+  console.log(res);
+  if(res=="exito"){
+    toastr.success('Pedido creado con exito')
+    
+    $("#modalListaPedido").modal("hide")
+    document.getElementById("formPedido").reset()
+    document.getElementById("listaCargada").innerHTML=""
+    document.getElementById("seleccionados").innerHTML=0
+    pedido=[]
+    traerPedidos()
+  }
+
+})
+
+
+
+
+
+
 });
 function vaciarFromPro() {
   document.getElementById("nombreProveedor").value=""
@@ -16,6 +64,7 @@ async function listarProveedores() {
     .then((data)=> {
         console.log(data)
         let listar=``
+        dibujarSelectProveedores(data)
         data.forEach(element => {
             listar+=`<div class="row">
                         <div style="padding: 2%;background: #383742b8;border-radius: 22px;margin-left: 6%;margin-right: 6%;box-shadow: 0px 0px 20px 0px #00000047;" class="col">
@@ -134,7 +183,7 @@ function cerrarYabrirOtroModal() {
 
 
 async function abrirModalEdit(id) {
-    let filtroArray= todosLosProveedores.find((m) => m.idProveedor === id);
+    let filtroArray= todosLosProveedores.find((m) => m.idProveedor == id);
     console.log("Es: " + filtroArray.nombreP );
     
     /* creo el select de categorias en el modal editar */
@@ -242,5 +291,153 @@ async function abrirModalEdit(id) {
           }
     });
   }
- 
+
+  function dibujarSelectProveedores(params) {
+    let options=`<option value="" selected >Selecciona un proveedor</option>`
+    params.forEach((element)=>{
+      options+=`<option value="${element.idProveedor}" >${element.nombreP}</option>`
+    })
+    document.getElementById("proveedorList").innerHTML=options
+  }
+
+  function dibujarArticulosCheck(params) {
+    let divsCheckBox=``
+    params.forEach((element)=>{
+      divsCheckBox+=`<div class="optionCheck mb-1" style="cursor:pointer;display:flex;background: #f4f4f4;padding: 1%;border-radius: 5px;">
+                          <div onclick="dibujarEnLista(this,${element.articulo})" style="width: 100%;display: flex;flex-direction: column;">
+                            <span>${element.nombre}</span>
+                            <label style="margin: 0px;font-size: 70%;">En stock ${element.cantidad}</label>
+                          </div>
+                    </div>`
+    })
+    document.getElementById("listaCheckBox").innerHTML=divsCheckBox
+    listaCheckBox=document.querySelectorAll('.optionCheck')
+  }
+  function dibujarEnLista(e, id) {
+    pedido.push(id);
+    document.getElementById("seleccionados").innerHTML = pedido.length;
+    console.log(e.childNodes[1].innerHTML);
+
+    let cardList = document.createElement('div');
+    cardList.className = 'cardList';
+
+    let div1 = document.createElement('div');
+    div1.style.width = '15%';
+    let a = document.createElement('a');
+    a.onclick = function() { borrar(this, id); };
+    a.textContent = 'X';
+    let input1 = document.createElement('input');
+    input1.style.display = 'none';
+    input1.type = 'number';
+    input1.name = 'articulo[]';
+    input1.value = id;
+    div1.appendChild(a);
+    div1.appendChild(input1);
+
+    let div2 = document.createElement('div');
+    div2.style.width = '70%';
+    let span = document.createElement('span');
+    span.style.fontSize = '65%';
+    span.textContent = e.childNodes[1].innerHTML;
+    div2.appendChild(span);
+
+    let div3 = document.createElement('div');
+    div3.style.width = '15%';
+    let input2 = document.createElement('input');
+    input2.style.cssText = 'width: 100%; padding: 1%; border-radius: 5px; border: 0px; box-shadow: 0px 0px 0px 1px #0084c8; outline: none;';
+    input2.type = 'number';
+    input2.required=true
+    input2.name = 'cantidad[]';
+    div3.appendChild(input2);
+
+    cardList.appendChild(div1);
+    cardList.appendChild(div2);
+    cardList.appendChild(div3);
+
+    document.getElementById("listaCargada").prepend(cardList);
+}
+
+
+  async function traerArticulos() {
+    const response = await fetch("php/traerArticulos.php");
+    const articulos = await response.json();
+    console.log(articulos);
+    dibujarArticulosCheck(articulos)
+    allArticulos=articulos
+  }
+  async function traerPedidos() {
+    const response = await fetch("php/traerPedidos.php");
+    const pppedidos = await response.json();
+    console.log(pppedidos);
+    dibujarPedidos(pppedidos)
+
+  }
+  function borrar(e,id) {
+    const index = pedido.findIndex((elemento) => elemento == id);
+    pedido.splice(index, 1);
+    document.getElementById("seleccionados").innerHTML=pedido.length
+    e.parentElement.parentElement.remove()
+  }
+  function dibujarPedidos(params) {
+    let cols=``
+    let detalle
+    let p=``
+    let producId
+    
+    params.forEach((element)=>{
+      if(params.length!=0){
+        detalle=element.detalle.split(",")
+        
+        detalle.forEach((detail)=>{
+          producId=detail.split(":")
+          console.log(producId)
+          p+=`<a style="border: 0px;border-radius: 5px;display: flex;justify-content: space-between;align-items: center;" href="#" class="list-group-item list-group-item-action">
+          <div>
+            ${producId[0]}
+            <br>
+            Cantidad:${producId[2]}
+          </div>
+          <div>
+            <button onclick="eliminarArticuloPedido(this,${producId[1]})" class="btn btn-sm btn-blue">X</button>
+          </div>
+          
+          </a>`
+        })
+
+      }
+
+      cols+=`<div class="col-12 mb-2">
+                  <!-- Div que al hacer clic se expande y muestra una lista -->
+                <div class="list-group">
+                  <div href="#" style="box-shadow: 2px -1px 1px 1px #323b9e;border: 0px;display: flex;flex-direction: row;justify-content: space-between;align-items: center !important;background: #246daf;padding: 1%;border-radius: 5px;color: white;" class="list-group-item list-group-item-action" data-toggle="collapse" data-target="#collapseExample${element.idPedido}" aria-expanded="false" aria-controls="collapseExample${element.idPedido}">
+                    <div>
+                      <p style="margin:0;">NRO: ${element.idPedido}</p>
+                      <p style="margin:0;">${element.nombreP}</p>
+                    </div>
+                    <p style="margin:0;">${element.fechaHora}</p>
+                  </div>
+
+                  <!-- Lista desplegable -->
+                  <div style="border-radius: 5px;box-shadow: #323b9e 1px 1px 1px 1px;margin: 0% 1% 0% 1%;" class="collapse" id="collapseExample${element.idPedido}">
+                    ${p}
+                  </div>
+                </div>
+              </div>`
+              p=``
+    })
+    document.getElementById("listaPedidosXd").innerHTML=cols
+  }
   
+
+  async function eliminarArticuloPedido(e,id) {
+    toastr.warning('Quitando un articulo de un pedido...')
+    await fetch('php/deleteArPedido.php?id='+id)
+    .then(response => response.json())
+    .then(async (data) => {
+        toastr.success('Articulo removido con exito.')
+        e.parentElement.parentElement.remove()
+        
+    }).catch(()=>{
+
+    });
+  }

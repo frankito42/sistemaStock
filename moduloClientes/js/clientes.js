@@ -50,9 +50,7 @@ $(document).ready(async function(){
     params.forEach(element => {
         tr+=`
         <tr>
-            <td>${element.nombreFamilia} <span onclick="abrirModalEditNameFamili(${element.id},'${element.nombreFamilia}')" style="cursor: pointer;color: #33b5e5;"><i class="fa-solid fa-pencil"></i></span></td>
-            <td>$${element.credito}</td>
-            <td><button onclick="abrirModalIntegrantes(${element.id})" class="btn btn-blue">Ver integrantes</button></td>
+            <td style="display: flex;justify-content: space-between;">${element.nombreCliente} <span onclick="abrirModalEditNameFamili(${element.id},'${element.nombreCliente}')" style="cursor: pointer;color: #33b5e5;"><i class="fa-solid fa-pencil"></i></span></td>
         </tr>
         `
     });
@@ -66,8 +64,8 @@ $(document).ready(async function(){
     $('#integrantes').modal("show")
     document.getElementById("idFami").value=id
     let filtroArray= familias.find((m) => parseInt(m.id) === parseInt(id));
-    console.log("Es: " + filtroArray.nombreFamilia );
-    document.getElementById("nombreFamilu").innerHTML=filtroArray.nombreFamilia
+    console.log("Es: " + filtroArray.nombreCliente );
+    document.getElementById("nombreFamilu").innerHTML=filtroArray.nombreCliente
     await traerIntegrantes(id)
     
   }

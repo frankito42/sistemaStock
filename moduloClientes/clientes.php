@@ -19,13 +19,11 @@ require "../conn/conn.php";
         <?php require "../navBar/navCarpeta.php";?>
     </section>
     <div class="container">
-    <button data-toggle="modal" data-target="#addnewFamily" class="btn btn-blue btn-lg">Nueva familia</button>
+    <button data-toggle="modal" data-target="#addnewFamily" class="btn btn-blue btn-lg">Nuevo cliente</button>
     <table class="table">
         <thead style="background: #1976d2;color: white;">
             <tr>
-                <th>Familias</th>
-                <th>Credito</th>
-                <th>Ver</th>
+                <th>Libretas</th>
             </tr>
         </thead>
         <tbody id="tebody"></tbody>
@@ -88,8 +86,8 @@ require "../conn/conn.php";
                 </div>
                     <div style="background: white;" class="modal-body animated">
                         <div class="md-form">
-                            <input type="text" required id="nombreFamilia" name="nombreFamilia" class="form-control validate">
-                            <label for="nombreFamilia">Nombre de la familia</label>
+                            <input type="text" required id="nombreCliente" name="nombreCliente" class="form-control validate">
+                            <label for="nombreCliente">Nombre de la familia</label>
                         </div>
                     </div>
                 <div class="modal-footer">

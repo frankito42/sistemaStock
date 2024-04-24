@@ -1,21 +1,18 @@
 <?php
 session_start();
 require "../../conn/conn.php";
-$sqlLibretas="SELECT libre.`idLibreta`,family.nombreFamilia,family.credito,libre.`nombreArticulo`,inte.nombre, libre.`idArticulo`, libre.`idIntegrante`, libre.`cantidad`, libre.`precio`, libre.`fecha`, libre.`idFamilia` FROM `libreta` as libre 
-INNER JOIN integrantes as inte on inte.idIntegrante=libre.idIntegrante 
-INNER JOIN familia as family on family.id=libre.idFamilia WHERE libre.`estado`='pendiente' AND libre.idFamilia=$_GET[id] ORDER BY libre.fecha desc";
+$sqlLibretas="SELECT l.idCliente,c.nombreCliente,c.credito, a.nombre,a.mayoritario,pL.`id`, pL.`idLibreta`, pL.`idProducto`, pL.`cantidad`, pL.`fechaHora` FROM `productoslibreta` pL
+JOIN libretas l on l.idLibreta=pL.idLibreta
+JOIN clientes c on c.id=l.idCliente
+JOIN articulos a on a.articulo=pL.idProducto
+WHERE l.idCliente=$_GET[id] and l.estado='pendiente'";
 $libretas=$conn->prepare($sqlLibretas);
+
 $libretas->execute();
 $libretas=$libretas->fetchAll(PDO::FETCH_ASSOC);
 
-$sqlLibretas2="SELECT libre.`idLibreta`,family.nombreFamilia,family.credito,libre.`nombreArticulo`,inte.nombre, libre.`idArticulo`, libre.`idIntegrante`, libre.`cantidad`, libre.`precio`, libre.`fecha`, libre.`idFamilia` FROM `libreta` as libre 
-INNER JOIN integrantes as inte on inte.idIntegrante=libre.idIntegrante 
-INNER JOIN familia as family on family.id=libre.idFamilia WHERE libre.`estado`='pendiente' AND libre.idFamilia=$_GET[id] ORDER BY inte.nombre,libre.`fecha` DESC";
-$libretas2=$conn->prepare($sqlLibretas2);
-$libretas2->execute();
-$libretas2=$libretas2->fetchAll(PDO::FETCH_ASSOC);
 
-$_SESSION['imprimir']=$libretas2;
+$_SESSION['imprimir']=$libretas;
 echo json_encode($libretas);
 
 

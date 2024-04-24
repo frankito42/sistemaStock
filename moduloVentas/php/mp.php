@@ -51,7 +51,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 $response = curl_exec($ch);
 if ($response === false) {
     echo "error";
-} else {
+} else { 
     $responseData = json_decode($response, true);
     if($responseData==[]){
         echo $idQr;

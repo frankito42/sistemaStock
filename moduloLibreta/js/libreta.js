@@ -1,4 +1,4 @@
-let familias
+let clientes
 document.addEventListener("DOMContentLoaded",async  function(event) {
   await traerFamilias()
   /* await traerLibreta() */
@@ -21,11 +21,11 @@ async function traerLibreta(id) {
   }); 
 }
 async function traerFamilias() {
-  await fetch('php/listarFamilias.php')
+  await fetch('php/listarClientes.php')
   .then((response) => response.json())
   .then(async (data) => {
     console.log(data)
-    familias=data
+    clientes=data
     dibujarFamilias(data)
   });
 }
@@ -35,8 +35,11 @@ async function dibujarFamilias(params) {
   params.forEach(element => {
     tr+=`
       <tr>
-        <td>${element.nombreFamilia}</td>
-        <td><button class="btn btn-blue" onclick="traerLibreta(${element.id})">Ver libreta</button><button class="btn btn-blue" onclick="verHistorial(${element.id})">Ver historial</button></td>
+        <td>${element.nombreCliente}</td>
+        <td>
+          <button class="btn btn-blue" onclick="traerLibreta(${element.id})">Ver</button>
+          <button class="btn btn-blue" onclick="verHistorial(${element.id})">Ver historial</button>
+        </td>
       </tr>
     `
   });
@@ -53,14 +56,14 @@ async function dibujarCards(params) {
 
 if (params.length>=1) {
   params.forEach(element => {
-    total+=element.cantidad*element.precio
+    total+=element.cantidad*element.mayoritario
     lista+=`
-    <h5 class="bold">${element.nombreArticulo}<span> x${element.cantidad}</span> <span style="color:#4caf50;">$${separator(element.cantidad*element.precio)}</span></h5>
-    <p style="color: #b3b3b3;"><span>${element.nombre}</span> ${element.fecha}</p>
+    <h5 class="bold">${element.nombre}<span> x${element.cantidad}</span> <span style="color:#4caf50;">$${separator(element.cantidad*element.mayoritario)}</span></h5>
+    <p style="color: #b3b3b3;"><span>${element.nombreCliente}</span> ${element.fechaHora}</p>
     `
-    lista2+=`*${element.nombreArticulo}*%0A
-    *Cantidad x${parseInt(element.cantidad)} $${separator(element.cantidad*element.precio)}*%0A
-    ${element.nombre} ${element.fecha}%0A________________________________%0A`
+    lista2+=`*${element.nombre}*%0A
+    *Cantidad x${parseInt(element.cantidad)} $${separator(element.cantidad*element.mayoritario)}*%0A
+    ${element.nombre} ${element.fechaHora}%0A________________________________%0A`
 });
 lista2+=`*TOTAL: $${separator(total)}*%0A*ENTREGADO: $${separator(parseInt(params[0].credito))}*%0A*FALTA PAGAR: $${separator(total-params[0].credito)}*`
 card=`
@@ -73,7 +76,7 @@ card=`
 <div class="view view-cascade gradient-card-header peach-gradient">
 
     <!-- Title -->
-    <h2 class="card-header-title mb-3">Familia: ${params[0].nombreFamilia}</h2>
+    <h2 class="card-header-title mb-3">Familia: ${params[0].nombreCliente}</h2>
     <!-- Text -->
 
 </div>
@@ -103,7 +106,7 @@ card=`
        <a class="btn btn-blue" target="_blank" href="https://wa.me//?text=${lista2}">WSAP</a>
       </div>
       <div class="col">
-        <a onclick="abrirModalPagar('${params[0].nombreFamilia}',${params[0].idFamilia},'${separator(total-params[0].credito)}')" class="green-text d-flex flex-row-reverse p-2">
+        <a onclick="abrirModalPagar('${params[0].nombreCliente}',${params[0].idCliente},'${separator(total-params[0].credito)}',${params[0].idLibreta})" class="green-text d-flex flex-row-reverse p-2">
           <h5 class="waves-effect waves-light">Pagar<i class="fas fa-angle-double-right ml-2"></i></h5>
         </a>
       </div>
@@ -146,10 +149,11 @@ card=`
 }
 
 
-function abrirModalPagar(nombreFamilia,idFamilia,totalApagar) {
-  console.log(idFamilia)
-  document.getElementById("titulo").innerHTML=nombreFamilia
-  document.getElementById("idFamiliaLibreta").value=idFamilia
+function abrirModalPagar(nombreCliente,idCliente,totalApagar,idLibreta) {
+  console.log(idCliente)
+  document.getElementById("titulo").innerHTML=nombreCliente
+  document.getElementById("idFamiliaLibreta").value=idCliente
+  document.getElementById("idLibretaTabla").value=idLibreta
   document.getElementById("total").innerHTML=totalApagar
   $("#pagarLibreta").modal("show")
 }
@@ -170,6 +174,7 @@ document.getElementById("formPagarLibreta").addEventListener("submit",async (e)=
   .then(async (data) => {
     console.log(data)
     if (data=="perfecto") {
+      guardarEnLocalStorage(document.getElementById("pagoCon").value)
       await traerLibreta(document.getElementById("idFamiliaLibreta").value)
       document.getElementById("pagoCon").disabled=false
       document.getElementById("pagarLibre").disabled=false
@@ -197,7 +202,13 @@ async function dibujarHistorial(params) {
     h4=`<h4>Sin historial</h4>`
   }else{
     params.forEach(element => {
-      h4+=`<h5>${element.fecha} Monto $${separator(element.monto)}</h5><hr>`
+      h4+=`<div class="${element.estado}">
+            <div><span>${element.idLibreta}</span></div>
+            <div style="display:flex;width: 90%;justify-content: space-between;">
+              <div><span>${element.fecha}</span></div>
+              <div><span>${element.estado}</span></div>
+            </div>
+          </div>`
     });
   }
   document.getElementById("listarHistorial").innerHTML=h4
@@ -207,4 +218,17 @@ function separator(numb) {
   var str = numb.toString().split(".");
   str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return str.join(".");
+}
+function guardarEnLocalStorage(numero) {
+  // Obtén el valor actual de "pagoLibreta"
+  let valorActual = localStorage.getItem("pagoLibreta");
+
+  // Si "pagoLibreta" no existe en localStorage, lo inicializamos con el número
+  if (valorActual === null) {
+    localStorage.setItem("pagoLibreta", numero);
+  } else {
+    // Si "pagoLibreta" ya existe, sumamos el número al valor actual
+    let nuevoValor = parseFloat(valorActual) + parseFloat(numero);
+    localStorage.setItem("pagoLibreta", nuevoValor);
+  }
 }
